@@ -1,8 +1,10 @@
+import warnings
 from colorsys import rgb_to_hsv
 from itertools import combinations
 
 import numpy as np
 from sklearn.cluster import KMeans
+
 
 def quantize_colors(pil_img, k=3, resize=120):
     """
@@ -28,8 +30,9 @@ def quantize_colors(pil_img, k=3, resize=120):
 
     img_data = np.array(img)
 
+    # Handle Grayscale → RGB
     if len(img_data.shape) == 2:
-        img_data = np.stack([img_data]*3, axis=-1)
+        img_data = np.stack([img_data] * 3, axis=-1)
 
     # Handle RGBA → RGB
     if img_data.shape[-1] == 4:
@@ -37,8 +40,28 @@ def quantize_colors(pil_img, k=3, resize=120):
 
     pixels = img_data.reshape(-1, 3)
 
-    kmeans = KMeans(n_clusters=k, n_init=10, random_state=42)
-    labels = kmeans.fit_predict(pixels)
+    # ---------------------------------------------------------
+    # FIX: Check how many actual unique colors exist in the crop
+    # ---------------------------------------------------------
+    unique_colors = np.unique(pixels, axis=0)
+    actual_k = min(k, len(unique_colors))
+
+    # Edge Case: Completely empty/transparent image somehow slipped through
+    if actual_k == 0:
+        return [("#FFFFFF", 1.0)]
+
+    # Edge Case: The image is exactly one solid color (no need to run K-Means)
+    if actual_k == 1:
+        rgb = tuple(unique_colors[0])
+        hex_code = '#{:02X}{:02X}{:02X}'.format(*rgb)
+        return [(hex_code, 1.0)]
+
+    # Suppress any lingering sklearn warnings and run K-Means with safe cluster count
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        kmeans = KMeans(n_clusters=actual_k, n_init=10, random_state=42)
+        labels = kmeans.fit_predict(pixels)
+
     centers = kmeans.cluster_centers_.astype(int)
 
     counts = np.bincount(labels)
@@ -55,18 +78,22 @@ def quantize_colors(pil_img, k=3, resize=120):
 
     return dominant_colors
 
+
 def hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip('#')
-    return tuple(int(hex_color[i:i+2], 16)/255 for i in (0, 2, 4))
+    return tuple(int(hex_color[i:i + 2], 16) / 255 for i in (0, 2, 4))
+
 
 def hue_from_hex(hex_color):
     r, g, b = hex_to_rgb(hex_color)
     h, s, v = rgb_to_hsv(r, g, b)
     return h * 360
 
+
 def angle_distance(a, b):
     diff = abs(a - b) % 360
     return min(diff, 360 - diff)
+
 
 def harmony_score(color_data):
     """
@@ -81,7 +108,7 @@ def harmony_score(color_data):
     total_weight = sum(weights)
     weights = [w / total_weight for w in weights]
 
-    if len(hues) == 1:
+    if len(hues) <= 1:
         return 1.0
 
     # ideal harmony angles in degrees
@@ -108,7 +135,7 @@ def harmony_score(color_data):
 
     # penalty for chaotic spread (too uneven spacing)
     sorted_hues = sorted(hues)
-    gaps = [angle_distance(sorted_hues[i], sorted_hues[(i+1) % len(sorted_hues)])
+    gaps = [angle_distance(sorted_hues[i], sorted_hues[(i + 1) % len(sorted_hues)])
             for i in range(len(sorted_hues))]
 
     gap_variation = max(gaps) - min(gaps)
@@ -117,6 +144,7 @@ def harmony_score(color_data):
     final_score = max(0, min(1, base_score - penalty))
 
     return round(final_score, 3)
+
 
 def harmony_score_from_images(images, k=3):
     """
@@ -159,11 +187,15 @@ def harmony_score_from_images(images, k=3):
 if __name__ == '__main__':
     # Example usage
     from PIL import Image
+    import os
 
-    shirt = Image.open("shirt.jpg")
-    pants = Image.open("pants.jpg")
-    shoes = Image.open("shoes.jpg")
+    # Just a small sanity check so the example doesn't crash if files are missing
+    if os.path.exists("shirt.jpg") and os.path.exists("pants.jpg") and os.path.exists("shoes.jpg"):
+        shirt = Image.open("shirt.jpg")
+        pants = Image.open("pants.jpg")
+        shoes = Image.open("shoes.jpg")
 
-    score = harmony_score_from_images([shirt, pants, shoes])
-
-    print("Outfit harmony:", score)
+        score = harmony_score_from_images([shirt, pants, shoes])
+        print("Outfit harmony:", score)
+    else:
+        print("Example images not found. Color Utils ready for import.")
