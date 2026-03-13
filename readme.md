@@ -440,8 +440,6 @@ Search:
 
 [//]: # (---)
 
-Here is the updated `design.md`. I have upgraded the **Personalization** section to include both the **User Centroid** (for tracking *what* style they like) and the **Bandit** (for tracking *how strict* they are about search relevance vs. pure aesthetics).
-
 ---
 
 ## 4. The “Brain” Layer (Recommendation Engine)
