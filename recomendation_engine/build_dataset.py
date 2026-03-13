@@ -59,4 +59,4 @@ def process_fashionpedia(json_path, img_dir, output_file="processed_pool.pt"):
 
 
 if __name__ == "__main__":
-    process_fashionpedia("../data/fashionpedia_coco/train/_annotations.coco.json", "data/fashionpedia_coco/train")
+    process_fashionpedia("../data/fashionpedia_coco/train/_annotations.coco.json", "../data/fashionpedia_coco/train")

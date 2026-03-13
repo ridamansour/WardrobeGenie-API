@@ -568,31 +568,395 @@ All heavy training is done in the cloud (GPU):
 
 ## 6. Data Storage Schema (Updated)
 
-```json
-{
-  "item_id": "uuid-1234",
-  "owner_id": "user-5678",
+```sql
+PRAGMA foreign_keys = ON;
 
-  "category": "top",
-  "sub_category": "t-shirt",
+-- =========================================================
+-- 1. USERS / PROFILE / SETTINGS
+-- =========================================================
 
-  "attributes": {
-    "fit": "regular",
-    "style": "casual"
-  },
+CREATE TABLE users (
+    id                  TEXT PRIMARY KEY,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
-  "metrics": {
-    "formality": 0.30,
-    "weather_warmth": 0.80,
-    "color_dominance": ["#1A2B4C", "#FFFFFF"]
-  },
+CREATE TABLE user_profiles (
+    user_id             TEXT PRIMARY KEY,
+    display_name        TEXT NOT NULL,
+    email               TEXT,
+    phone               TEXT,
+    city                TEXT,
+    preferred_style     TEXT,
+    clothing_size       TEXT,
+    bio                 TEXT,
+    profile_image_upload_id TEXT,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (profile_image_upload_id) REFERENCES uploads(id) ON DELETE SET NULL
+);
 
-  "embedding": [0.042, -0.11, 0.55, "..."],
+CREATE TABLE user_settings (
+    user_id             TEXT PRIMARY KEY,
+    theme               TEXT NOT NULL DEFAULT 'light',
+    language            TEXT NOT NULL DEFAULT 'en',
+    wardrobe_view       TEXT NOT NULL DEFAULT 'deck',
+    auto_save           INTEGER NOT NULL DEFAULT 0,
+    notifications       INTEGER NOT NULL DEFAULT 1,
+    default_occasion    TEXT,
+    default_style       TEXT,
+    weather_auto        INTEGER NOT NULL DEFAULT 1,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
-  "last_worn": "2026-02-14",
-  "wear_count": 15,
-  "dirty_status": false
-}
+-- =========================================================
+-- 2. FILES / UPLOADS
+-- =========================================================
+
+CREATE TABLE uploads (
+    id                  TEXT PRIMARY KEY,
+    owner_user_id       TEXT,
+    path                TEXT NOT NULL UNIQUE,
+    original_filename   TEXT,
+    content_type        TEXT,
+    file_size_bytes     INTEGER,
+    width_px            INTEGER,
+    height_px           INTEGER,
+    source_type         TEXT,   -- analyze, analyze_outfit, profile_image, manual_upload
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- =========================================================
+-- 3. WARDROBE CORE
+-- =========================================================
+
+CREATE TABLE wardrobe_items (
+    id                  TEXT PRIMARY KEY,
+    owner_user_id       TEXT NOT NULL,
+    upload_id           TEXT,
+    clothing_type       TEXT NOT NULL,      -- shirt, pants, dress, jacket, shoes, accessory
+    category            TEXT,               -- top, bottom, shoes, accessory
+    sub_category        TEXT,               -- t-shirt, blazer, sneakers, etc.
+    display_name        TEXT,
+    material            TEXT,
+    fit                 TEXT,               -- slim, regular, oversized
+    style               TEXT,               -- casual, formal, sporty
+    formality_score     REAL,
+    weather_warmth      REAL,
+    dirty_status        INTEGER NOT NULL DEFAULT 0,
+    last_worn           TEXT,
+    wear_count          INTEGER NOT NULL DEFAULT 0,
+    is_active           INTEGER NOT NULL DEFAULT 1,
+
+    -- confidence fields from UI/model pipeline
+    detection_confidence    REAL,
+    color_confidence        REAL,
+    type_confidence         REAL,
+    material_confidence     REAL,
+    formality_confidence    REAL,
+    weather_confidence      REAL,
+
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (upload_id) REFERENCES uploads(id) ON DELETE SET NULL
+);
+
+CREATE TABLE wardrobe_item_colors (
+    id                  TEXT PRIMARY KEY,
+    item_id             TEXT NOT NULL,
+    hex_code            TEXT,
+    r                   INTEGER NOT NULL,
+    g                   INTEGER NOT NULL,
+    b                   INTEGER NOT NULL,
+    percentage          REAL,       -- dominant ratio if available
+    confidence          REAL,
+    sort_order          INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (item_id) REFERENCES wardrobe_items(id) ON DELETE CASCADE
+);
+
+CREATE TABLE wardrobe_item_weather_scores (
+    id                  TEXT PRIMARY KEY,
+    item_id             TEXT NOT NULL,
+    weather_key         TEXT NOT NULL,      -- hot, cold, mild, rainy, windy, snow
+    score               REAL NOT NULL,
+    FOREIGN KEY (item_id) REFERENCES wardrobe_items(id) ON DELETE CASCADE,
+    UNIQUE (item_id, weather_key)
+);
+
+CREATE TABLE wardrobe_item_embeddings (
+    item_id             TEXT PRIMARY KEY,
+    embedding_json      TEXT NOT NULL,      -- SQLite-friendly; can later move to vector store
+    embedding_dim       INTEGER NOT NULL DEFAULT 512,
+    model_name          TEXT,
+    model_version       TEXT,
+    normalized          INTEGER NOT NULL DEFAULT 1,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (item_id) REFERENCES wardrobe_items(id) ON DELETE CASCADE
+);
+
+-- Optional if you want raw attribute probabilities later
+CREATE TABLE wardrobe_item_attribute_scores (
+    id                  TEXT PRIMARY KEY,
+    item_id             TEXT NOT NULL,
+    attribute_name      TEXT NOT NULL,      -- fit, style, etc.
+    attribute_value     TEXT NOT NULL,      -- regular, casual, etc.
+    score               REAL NOT NULL,
+    FOREIGN KEY (item_id) REFERENCES wardrobe_items(id) ON DELETE CASCADE
+);
+
+-- =========================================================
+-- 4. ANALYSIS SESSIONS
+-- Used for /analyze and /analyze-outfit flows
+-- =========================================================
+
+CREATE TABLE analysis_sessions (
+    id                  TEXT PRIMARY KEY,
+    owner_user_id       TEXT NOT NULL,
+    source_upload_id    TEXT,
+    source_type         TEXT NOT NULL,      -- analyze, analyze_outfit, manual
+    occasion            TEXT,
+    style_intent        TEXT,
+    weather_text        TEXT,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (source_upload_id) REFERENCES uploads(id) ON DELETE SET NULL
+);
+
+CREATE TABLE analysis_session_items (
+    id                  TEXT PRIMARY KEY,
+    session_id          TEXT NOT NULL,
+    wardrobe_item_id    TEXT,               -- if matched to existing wardrobe item
+    upload_id           TEXT,               -- cropped or original source
+    clothing_type       TEXT,
+    material            TEXT,
+    formality_score     REAL,
+    image_path_snapshot TEXT,
+    position_index      INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (session_id) REFERENCES analysis_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (wardrobe_item_id) REFERENCES wardrobe_items(id) ON DELETE SET NULL,
+    FOREIGN KEY (upload_id) REFERENCES uploads(id) ON DELETE SET NULL
+);
+
+CREATE TABLE analysis_session_item_colors (
+    id                  TEXT PRIMARY KEY,
+    analysis_item_id    TEXT NOT NULL,
+    hex_code            TEXT,
+    r                   INTEGER NOT NULL,
+    g                   INTEGER NOT NULL,
+    b                   INTEGER NOT NULL,
+    percentage          REAL,
+    confidence          REAL,
+    sort_order          INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (analysis_item_id) REFERENCES analysis_session_items(id) ON DELETE CASCADE
+);
+
+-- =========================================================
+-- 5. RECOMMENDATION RUNS / RESULTS / FEEDBACK
+-- =========================================================
+
+CREATE TABLE recommendation_runs (
+    id                  TEXT PRIMARY KEY,
+    owner_user_id       TEXT NOT NULL,
+    analysis_session_id TEXT,
+    occasion            TEXT,
+    style_intent        TEXT,
+    weather_text        TEXT,
+    query_text          TEXT,
+    alpha_weight        REAL,
+    beta_weight         REAL,
+    model_name          TEXT,
+    model_version       TEXT,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (analysis_session_id) REFERENCES analysis_sessions(id) ON DELETE SET NULL
+);
+
+CREATE TABLE recommendations (
+    id                  TEXT PRIMARY KEY,
+    run_id              TEXT NOT NULL,
+    rank_index          INTEGER NOT NULL,
+    compatibility_score REAL NOT NULL,
+    relevance_score     REAL,
+    final_score         REAL,
+    color_harmony       REAL,
+    formality_match     REAL,
+    material_compat     REAL,
+    weather_compat      REAL,
+    explanation         TEXT,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (run_id) REFERENCES recommendation_runs(id) ON DELETE CASCADE,
+    UNIQUE (run_id, rank_index)
+);
+
+CREATE TABLE recommendation_items (
+    id                  TEXT PRIMARY KEY,
+    recommendation_id   TEXT NOT NULL,
+    wardrobe_item_id    TEXT,
+    analysis_item_id    TEXT,
+    clothing_type_snapshot TEXT,
+    material_snapshot   TEXT,
+    formality_score_snapshot REAL,
+    position_index      INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (recommendation_id) REFERENCES recommendations(id) ON DELETE CASCADE,
+    FOREIGN KEY (wardrobe_item_id) REFERENCES wardrobe_items(id) ON DELETE SET NULL,
+    FOREIGN KEY (analysis_item_id) REFERENCES analysis_session_items(id) ON DELETE SET NULL
+);
+
+CREATE TABLE recommendation_style_tips (
+    id                  TEXT PRIMARY KEY,
+    recommendation_id   TEXT NOT NULL,
+    tip_text            TEXT NOT NULL,
+    sort_order          INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (recommendation_id) REFERENCES recommendations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE feedback_events (
+    id                  TEXT PRIMARY KEY,
+    owner_user_id       TEXT NOT NULL,
+    run_id              TEXT,
+    recommendation_id   TEXT,
+    recommendation_index INTEGER,
+    feedback_type       TEXT NOT NULL,      -- approval, rejection, skip
+    reward_value        REAL,               -- +1, -1, etc.
+    occasion            TEXT,
+    style_intent        TEXT,
+    weather_text        TEXT,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (run_id) REFERENCES recommendation_runs(id) ON DELETE SET NULL,
+    FOREIGN KEY (recommendation_id) REFERENCES recommendations(id) ON DELETE SET NULL
+);
+
+CREATE TABLE user_preference_weights (
+    user_id             TEXT PRIMARY KEY,
+    alpha_weight        REAL,
+    beta_weight         REAL,
+    updated_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- =========================================================
+-- 6. SAVED OUTFITS
+-- =========================================================
+
+CREATE TABLE saved_outfits (
+    id                  TEXT PRIMARY KEY,
+    owner_user_id       TEXT NOT NULL,
+    source_recommendation_id TEXT,
+    compatibility_score REAL,
+    occasion            TEXT,
+    style_intent        TEXT,
+    weather_text        TEXT,
+    saved_at            TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (source_recommendation_id) REFERENCES recommendations(id) ON DELETE SET NULL
+);
+
+CREATE TABLE saved_outfit_items (
+    id                  TEXT PRIMARY KEY,
+    saved_outfit_id     TEXT NOT NULL,
+    wardrobe_item_id    TEXT,
+    clothing_type_snapshot TEXT,
+    material_snapshot   TEXT,
+    formality_score_snapshot REAL,
+    position_index      INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (saved_outfit_id) REFERENCES saved_outfits(id) ON DELETE CASCADE,
+    FOREIGN KEY (wardrobe_item_id) REFERENCES wardrobe_items(id) ON DELETE SET NULL
+);
+
+-- =========================================================
+-- 7. HISTORY
+-- =========================================================
+
+CREATE TABLE history_entries (
+    id                  TEXT PRIMARY KEY,
+    owner_user_id       TEXT NOT NULL,
+    entry_type          TEXT NOT NULL,      -- analysis, recommendation, save, feedback
+    occasion            TEXT,
+    style_intent        TEXT,
+    weather_text        TEXT,
+    at                  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- =========================================================
+-- 8. WEATHER CACHE
+-- Optional but useful
+-- =========================================================
+
+CREATE TABLE weather_snapshots (
+    id                  TEXT PRIMARY KEY,
+    owner_user_id       TEXT,
+    lat                 REAL,
+    lon                 REAL,
+    temp_c              REAL NOT NULL,
+    description         TEXT NOT NULL,
+    recommendation      TEXT,
+    icon_code           TEXT,
+    humidity            REAL,
+    wind_speed          REAL,
+    fetched_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at          TEXT,
+    FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- =========================================================
+-- 9. MODEL REGISTRY
+-- Helps with explainability and migrations
+-- =========================================================
+
+CREATE TABLE model_registry (
+    id                  TEXT PRIMARY KEY,
+    model_name          TEXT NOT NULL,
+    model_version       TEXT NOT NULL,
+    model_type          TEXT NOT NULL,      -- detector, attribute_classifier, embedding, outfit_ranker
+    file_path           TEXT,
+    is_active           INTEGER NOT NULL DEFAULT 1,
+    created_at          TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================================================
+-- 10. INDEXES
+-- =========================================================
+
+CREATE INDEX idx_uploads_owner ON uploads(owner_user_id);
+
+CREATE INDEX idx_wardrobe_owner ON wardrobe_items(owner_user_id);
+CREATE INDEX idx_wardrobe_type ON wardrobe_items(clothing_type);
+CREATE INDEX idx_wardrobe_category ON wardrobe_items(category);
+CREATE INDEX idx_wardrobe_formality ON wardrobe_items(formality_score);
+CREATE INDEX idx_wardrobe_warmth ON wardrobe_items(weather_warmth);
+CREATE INDEX idx_wardrobe_dirty ON wardrobe_items(dirty_status);
+
+CREATE INDEX idx_item_colors_item ON wardrobe_item_colors(item_id);
+CREATE INDEX idx_item_weather_item ON wardrobe_item_weather_scores(item_id);
+
+CREATE INDEX idx_analysis_owner ON analysis_sessions(owner_user_id);
+CREATE INDEX idx_analysis_created ON analysis_sessions(created_at);
+CREATE INDEX idx_analysis_items_session ON analysis_session_items(session_id);
+
+CREATE INDEX idx_runs_owner ON recommendation_runs(owner_user_id);
+CREATE INDEX idx_runs_created ON recommendation_runs(created_at);
+CREATE INDEX idx_recommendations_run ON recommendations(run_id);
+CREATE INDEX idx_feedback_owner ON feedback_events(owner_user_id);
+CREATE INDEX idx_feedback_created ON feedback_events(created_at);
+
+CREATE INDEX idx_saved_owner ON saved_outfits(owner_user_id);
+CREATE INDEX idx_saved_saved_at ON saved_outfits(saved_at);
+
+CREATE INDEX idx_history_owner ON history_entries(owner_user_id);
+CREATE INDEX idx_history_at ON history_entries(at);
+
+CREATE INDEX idx_weather_owner ON weather_snapshots(owner_user_id);
+CREATE INDEX idx_weather_expiry ON weather_snapshots(expires_at);
 ```
 
 ---
