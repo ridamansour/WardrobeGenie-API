@@ -3,85 +3,44 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class Gatekeeper:
-    """Filters wardrobe items based on hard constraints and semantic similarity."""
+class OutfitEmbeddingTransformer(nn.Module):
+    """The Stylist: A Set-Transformer that encodes outfit harmony into a 128-dim space."""
 
-    def __init__(self, wardrobe_db):
-        self.wardrobe = wardrobe_db
-
-    def filter_and_rank(self, query_vec, filters, context, top_k=50):
-        candidates = []
-        for item in self.wardrobe:
-            # Hard Filters: Formality & Weather
-            if item["metrics"]["formality"] < filters.get("min_formality", 0.0):
-                continue
-
-            temp = context.get("temperature", 20)
-            # Prevent parkas in summer or tees in a blizzard
-            if temp < 10 and item["metrics"]["weather_warmth"] > 0.7: continue
-            if temp > 28 and item["metrics"]["weather_warmth"] < 0.3: continue
-
-            # Semantic Similarity
-            item_vec = torch.tensor(item["embedding"]).unsqueeze(0)
-            similarity = F.cosine_similarity(item_vec, query_vec).item()
-            candidates.append((similarity, item))
-
-        candidates.sort(key=lambda x: x[0], reverse=True)
-        return [item for _, item in candidates[:top_k]]
-
-
-import torch
-import torch.nn as nn
-
-class OutfitSetTransformer(nn.Module):
-    def __init__(self, embed_dim=512, num_categories=10, num_heads=4, dropout=0.3):
+    def __init__(self, embed_dim=512, projection_dim=128, num_categories=50, num_heads=8, dropout=0.3):
         super().__init__()
+        # Category embeddings to provide semantic context to the visual vectors
         self.category_embed = nn.Embedding(num_categories, embed_dim)
 
-        # Self-attention allows every item to "look" at every other item
-        self.attention = nn.MultiheadAttention(
-            embed_dim, num_heads, dropout=dropout, batch_first=True
+        # Transformer Encoder to capture cross-item relationships (e.g., how the shoes match the top)
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=embed_dim,
+            nhead=num_heads,
+            dropout=dropout,
+            batch_first=True
         )
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=3)
 
-        self.ffn = nn.Sequential(
+        # Projection head to the normalized "Vibe Space"
+        self.projection = nn.Sequential(
             nn.Linear(embed_dim, 256),
             nn.ReLU(),
-            nn.Dropout(dropout),  # Added as requested
-            nn.Linear(256, 128),
-            nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(128, 1),
-            nn.Sigmoid()
+            nn.Linear(256, projection_dim)
         )
 
     def forward(self, item_vectors, category_ids):
         # item_vectors: (Batch, N, 512) | category_ids: (Batch, N)
+
+        # 1. Add category context to visual embeddings
         cat_embs = self.category_embed(category_ids)
         x = item_vectors + cat_embs
 
-        # attn_out: (Batch, N, 512)
-        attn_out, _ = self.attention(x, x, x)
+        # 2. Contextualize items through attention layers
+        x = self.transformer(x)
 
-        # Mean pooling to get a single 'vibe' vector for the whole outfit
-        outfit_representation = attn_out.mean(dim=1)
-        return self.ffn(outfit_representation)
+        # 3. Global Pooling: Mean of all items to represent the "Outfit Vector"
+        outfit_vec = x.mean(dim=1)
 
-
-class PersonalPreferenceBandit:
-    """Adjusts α/β weights based on user interaction (Reinforcement-lite)."""
-
-    def __init__(self, alpha=0.6, beta=0.4, lr=0.05):
-        self.alpha = alpha
-        self.beta = beta
-        self.lr = lr
-
-    def update(self, liked, comp_score, rel_score):
-        reward = 1 if liked else -1
-        # Nudge weights based on which component contributed to the 'liked' state
-        self.alpha += reward * (comp_score - 0.5) * self.lr
-        self.beta += reward * (rel_score - 0.5) * self.lr
-
-        # Clamp and Normalize
-        self.alpha, self.beta = max(0.1, self.alpha), max(0.1, self.beta)
-        total = self.alpha + self.beta
-        self.alpha, self.beta = self.alpha / total, self.beta / total
+        # 4. Project and Normalize (crucial for Triplet Loss distances)
+        embedding = self.projection(outfit_vec)
+        return F.normalize(embedding, p=2, dim=1)

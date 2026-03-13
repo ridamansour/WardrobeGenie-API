@@ -272,108 +272,279 @@ Search:
 
 ---
 
+[//]: # (## 4. The “Brain” Layer &#40;Recommendation Engine&#41;)
+
+[//]: # ()
+[//]: # (This is where filtering + combination + scoring produces ranked outfits.)
+
+[//]: # ()
+[//]: # (### A. Context-Aware Pre-Filter &#40;Gatekeeper&#41;)
+
+[//]: # ()
+[//]: # (**Goal:** Reduce the wardrobe to a candidate set &#40;~50 items&#41; before trying combinations.)
+
+[//]: # ()
+[//]: # (#### Input:)
+
+[//]: # ()
+[//]: # (* Context &#40;occasion, weather, temperature, etc.&#41;)
+
+[//]: # (* Query embedding)
+
+[//]: # (* Wardrobe database)
+
+[//]: # ()
+[//]: # (#### Output:)
+
+[//]: # ()
+[//]: # (Candidate items list.)
+
+[//]: # ()
+[//]: # (#### Example:)
+
+[//]: # ()
+[//]: # (```txt)
+
+[//]: # (Input:)
+
+[//]: # (    Context: {"occasion":"office", "temp":15})
+
+[//]: # (    Query: "business meeting")
+
+[//]: # ()
+[//]: # (Operation:)
+
+[//]: # (    1&#41; filter formality_score >= 0.60)
+
+[//]: # (    2&#41; filter weather_warmth <= threshold for cold)
+
+[//]: # (    3&#41; rank by cosine similarity to query_vec, take top_k)
+
+[//]: # ()
+[//]: # (Output:)
+
+[//]: # (    ["uuid_top_1", "uuid_bottom_5", "uuid_shoes_2", ...])
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (---)
+
+[//]: # ()
+[//]: # (### B. Outfit Compatibility Model &#40;Set-Transformer “Stylist”&#41;)
+
+[//]: # ()
+[//]: # (**Model:** Small Set-Transformer &#40;attention-based&#41;)
+
+[//]: # (**Purpose:** Given a set of item vectors &#40;+ category ids&#41;, output outfit compatibility score.)
+
+[//]: # ()
+[//]: # (#### Input:)
+
+[//]: # ()
+[//]: # (* item_vectors: &#40;1, N, 512&#41;)
+
+[//]: # (* category_ids: &#40;1, N&#41;)
+
+[//]: # ()
+[//]: # (#### Output:)
+
+[//]: # ()
+[//]: # (compatibility_score &#40;0–1&#41;)
+
+[//]: # ()
+[//]: # (#### Example:)
+
+[//]: # ()
+[//]: # (```txt)
+
+[//]: # (Input:)
+
+[//]: # (    item_vectors: torch.Tensor&#40;&#41;  # &#40;1, 3, 512&#41; top/bottom/shoes)
+
+[//]: # (    category_ids: torch.Tensor&#40;&#41;  # &#40;1, 3&#41; [0,1,2])
+
+[//]: # ()
+[//]: # (Output:)
+
+[//]: # (    0.94)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (---)
+
+[//]: # (### C. Final Ranking &#40;Compatibility + Relevance&#41;)
+
+[//]: # ()
+[//]: # (Combine:)
+
+[//]: # ()
+[//]: # (* Aesthetic score &#40;transformer&#41;)
+
+[//]: # (* Relevance score &#40;the mean of the score_item for each garment in the set&#41; // Refrence: 2C Hybrid Filtering  )
+
+[//]: # ()
+[//]: # (#### Example:)
+
+[//]: # ()
+[//]: # (```txt)
+
+[//]: # (final_score = α * aesthetic_score + β * relevance_score)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (---)
+
+[//]: # ()
+[//]: # (### D. Personalization &#40;Reinforcement-lite / Bandit&#41;)
+
+[//]: # ()
+[//]: # (**Goal:** Adapt scoring weights &#40;α/β&#41; or last-layer parameters from feedback.)
+
+[//]: # ()
+[//]: # (#### Input:)
+
+[//]: # ()
+[//]: # (* user feedback &#40;like/dislike/skip&#41;)
+
+[//]: # (* context + query embedding)
+
+[//]: # ()
+[//]: # (#### Output:)
+
+[//]: # ()
+[//]: # (Updated weights / preference parameters.)
+
+[//]: # ()
+[//]: # (#### Example:)
+
+[//]: # ()
+[//]: # (```txt)
+
+[//]: # (Input:)
+
+[//]: # (    reward = +1 &#40;liked&#41;)
+
+[//]: # (    state = &#40;query_vec, context&#41;)
+
+[//]: # ()
+[//]: # (Output:)
+
+[//]: # (    α := α + Δα)
+
+[//]: # (    β := β + Δβ)
+
+[//]: # (```)
+
+[//]: # (---)
+
+Here is the updated `design.md`. I have upgraded the **Personalization** section to include both the **User Centroid** (for tracking *what* style they like) and the **Bandit** (for tracking *how strict* they are about search relevance vs. pure aesthetics).
+
+---
+
 ## 4. The “Brain” Layer (Recommendation Engine)
 
-This is where filtering + combination + scoring produces ranked outfits.
+This is where filtering, set-embedding, and personalized spatial ranking produce the final recommended outfits.
 
 ### A. Context-Aware Pre-Filter (Gatekeeper)
 
-**Goal:** Reduce the wardrobe to a candidate set (~50 items) before trying combinations.
+**Goal:** Reduce the total wardrobe to a candidate set (~50 items) using hard constraints and semantic search.
 
 #### Input:
 
-* Context (occasion, weather, temperature, etc.)
-* Query embedding
-* Wardrobe database
+* **Context**: Occasion, weather, temperature, etc. (from Attribute Classifier).
+* **Query Embedding**: Vectorized user text (e.g., via Student-CLIP).
+* **Wardrobe DB**: Pre-vectorized garment features and metadata.
 
-#### Output:
+#### Operation:
 
-Candidate items list.
-
-#### Example:
-
-```txt
-Input:
-    Context: {"occasion":"office", "temp":15}
-    Query: "business meeting"
-
-Operation:
-    1) filter formality_score >= 0.60
-    2) filter weather_warmth <= threshold for cold
-    3) rank by cosine similarity to query_vec, take top_k
-
-Output:
-    ["uuid_top_1", "uuid_bottom_5", "uuid_shoes_2", ...]
-```
+1. **Attribute Filter**: Remove items with mismatched `weather_warmth` or `formality_score` based on context.
+2. **Semantic Retrieval**: Rank remaining items by cosine similarity between the garment vector and the query vector.
+3. **Top-K Selection**: Pass the top 50 candidates to the combination generator.
 
 ---
 
 ### B. Outfit Compatibility Model (Set-Transformer “Stylist”)
 
-**Model:** Small Set-Transformer (attention-based)
-**Purpose:** Given a set of item vectors (+ category ids), output outfit compatibility score.
+**Model:** Triplet-based Set-Transformer.
+**Purpose:** Map a set of items into a 128-dimensional **Style Space**. In this space, proximity represents stylistic compatibility.
 
 #### Input:
 
-* item_vectors: (1, N, 512)
-* category_ids: (1, N)
+* **item_vectors**: `(1, N, 512)` (Visual embeddings).
+* **category_ids**: `(1, N)` (Categorical context).
 
 #### Output:
 
-compatibility_score (0–1)
-
-#### Example:
-
-```txt
-Input:
-    item_vectors: torch.Tensor()  # (1, 3, 512) top/bottom/shoes
-    category_ids: torch.Tensor()  # (1, 3) [0,1,2]
-
-Output:
-    0.94
-```
+* **outfit_embedding ($V_{outfit}$)**: A normalized `(1, 128)` vector representing the holistic "vibe" of the generated outfit.
 
 ---
 
-### C. Final Ranking (Compatibility + Relevance)
+### C. Final Ranking (Personalized Taste + Relevance)
 
-Combine:
-
-* Aesthetic score (transformer)
-* Relevance score (the mean of the score_item for each garment in the set) // Refrence: 2C Hybrid Filtering  
-
-#### Example:
-
-```txt
-final_score = α * aesthetic_score + β * relevance_score
-```
-
----
-
-### D. Personalization (Reinforcement-lite / Bandit)
-
-**Goal:** Adapt scoring weights (α/β) or last-layer parameters from feedback.
+Compatibility is no longer a static global score. It is dynamically calculated based on the outfit's distance to the user's specific **Taste Centroid** in the 128-dim Style Space.
 
 #### Input:
 
-* user feedback (like/dislike/skip)
-* context + query embedding
+* **$V_{outfit}$**: The 128-dim outfit embedding from the Stylist model.
+* **$V_{user}$**: The user's personalized 128-dim profile centroid.
+* **Query Similarity**: Cosine similarity of the items to the text query.
 
-#### Output:
+#### Scoring Logic:
 
-Updated weights / preference parameters.
+1. **Personal Aesthetic Score ($S_{style}$)**: Calculated as $\frac{1}{1 + d}$, where $d$ is the Euclidean distance between $V_{outfit}$ and $V_{user}$.
+2. **Relevance Score ($S_{rel}$)**: The mean cosine similarity between the query vector and each individual garment in the set.
 
-#### Example:
+#### Formula:
 
-```txt
-Input:
-    reward = +1 (liked)
-    state = (query_vec, context)
+$$\text{final_score} = \alpha \cdot S_{style} + \beta \cdot S_{rel}$$
 
-Output:
-    α := α + Δα
-    β := β + Δβ
-```
+---
+
+### D. Personalization (Taste Centroid + Bandit)
+
+**Goal:** Adapt the user's location in the Style Space (*Taste Centroid*) AND their preference for strict matching vs. aesthetic exploration (*Bandit Weights*).
+
+#### Input:
+
+* **Feedback**: Reward ($+1$ for Like/Wear, $-1$ for Dislike/Skip).
+* **$V_{outfit}$**: The embedding of the outfit they just interacted with.
+* **State**: Current $V_{user}$ vector, $\alpha, \beta$ weights, and learning rate ($\gamma = 0.15$).
+
+#### Operation 1: Centroid Update (Learning *What* They Like)
+
+Move the user's profile vector through the embedding space based on interaction.
+
+* **If Liked**: Pull user towards the outfit.
+
+$$V_{user} := (1 - \gamma) \cdot V_{user} + (\gamma \cdot V_{outfit})$$
+
+
+* **If Disliked**: Push user away from the outfit.
+
+$$V_{user} := V_{user} - (\gamma \cdot 0.5 \cdot (V_{outfit} - V_{user}))$$
+
+
+* *Note: Always L2-normalize $V_{user}$ after an update to keep it on the hypersphere.*
+
+#### Operation 2: Bandit Update (Learning *How* They Shop)
+
+Adjust the balance between Personal Style and Search Relevance.
+
+* $\alpha := \alpha + \text{reward} \cdot (S_{style} - 0.5) \cdot 0.1$
+* $\beta := \beta + \text{reward} \cdot (S_{rel} - 0.5) \cdot 0.1$
+* *Note: Ensure $\alpha + \beta = 1.0$ and clamp values to $[0.1, 0.9]$.*
+
+---
+
+### Status Check:
+
+* [x] **Architecture**: Shifted to Triplet-Loss Embedding.
+* [x] **Dataset**: Implemented with hard-negative mining (Color Score thresholding).
+* [ ] **Training**: Integrated with TensorBoard and Early Stopping.
+* [ ] **Personalization**: Shifted from global heuristics to dynamic User Centroids.
 
 ---
 

@@ -1,126 +1,62 @@
 import os
-import argparse
+import json
 import torch
-from pathlib import Path
 from PIL import Image
 from tqdm import tqdm
-from collections import Counter
-from itertools import combinations
-
-# Import your Perception modules
-from perception_layer.clothing_detection_segmintation import inference as det_inference
-from perception_layer.multi_attribute_classifire import inference as attr_inference
-from perception_layer import color_utils
-
-
-# Placeholder for your Vectorizer (e.g., Student CLIP)
+from collections import defaultdict
 from representation_layer.visual_embeddings.inference import GarmentEmbedder
 
-def build_co_occurrence_matrix(all_outfit_categories):
-    """Builds the category co-occurrence matrix for negative sampling."""
-    pair_counts = Counter()
-    for cats in all_outfit_categories:
-        sorted_cats = sorted(cats)
-        for pair in combinations(sorted_cats, 2):
-            pair_counts[pair] += 1
 
-    matrix = {}
-    max_val = max(pair_counts.values()) if pair_counts else 1
-    for pair, count in pair_counts.items():
-        matrix[pair] = count / max_val
-    return matrix
+def process_fashionpedia(json_path, img_dir, output_file="processed_pool.pt"):
+    """
+    Parses Fashionpedia, crops items, vectorizes them, and saves a flattened pool.
+    """
+    embedder = GarmentEmbedder()
 
+    with open(json_path, 'r') as f:
+        data = json.load(f)
 
-def main(dataset_path, det_model_path, attr_model_path, output_file):
-    print(f"Loading Perception Models...")
-    garment_detector = det_inference.GarmentDetector(det_model_path)
-    attribute_predictor = attr_inference.AttributePredictor(attr_model_path)
-    embedder = GarmentEmbedder() # Initialize your 512-dim vectorizer here
+    images = {img['id']: img for img in data['images']}
+    anns_by_img = defaultdict(list)
+    for ann in data['annotations']:
+        anns_by_img[ann['image_id']].append(ann)
 
-    image_paths = list(Path(dataset_path).glob("*.jpg")) + list(Path(dataset_path).glob("*.jpeg"))
-    print(f"Found {len(image_paths)} images in {dataset_path}")
-
-    processed_outfits = []
+    outfits = []
     wardrobe_pool = []
-    all_outfit_categories = []
 
-    for img_path in tqdm(image_paths, desc="Processing Fashionpedia"):
+    print(f"Processing images in {img_dir}...")
+    for img_id, anns in tqdm(anns_by_img.items()):
+        if len(anns) < 2: continue  # Ignore single-garment images
+
+        img_info = images[img_id]
+        img_path = os.path.join(img_dir, img_info['file_name'])
         try:
-            img = Image.open(img_path).convert("RGB")
-        except Exception as e:
-            print(f"Skipping {img_path}: {e}")
+            full_img = Image.open(img_path).convert("RGB")
+        except:
             continue
 
-        # 1. Detect Garments
-        garments = garment_detector.predict(img)
-        if len(garments) < 2:
-            continue  # Skip images that don't have at least a top/bottom pairing
+        current_outfit = {"vecs": [], "cats": [], "crops": []}
 
-        outfit_items = []
-        outfit_cats = []
+        for ann in anns:
+            # 1. Get cropped images of given bboxes
+            x, y, w, h = ann['bbox']
+            crop = full_img.crop((x, y, x + w, y + h))
 
-        for garment in garments:
-            cropped_img = garment["image"].convert("RGB")
+            # 2. Vectorize using GarmentEmbedder
+            vec = embedder.embed_crop(crop)
 
-            # 2. Extract Attributes
-            attributes = attribute_predictor.predict(cropped_img)
+            item = {"vec": vec, "cat": ann['category_id'], "img": crop}
+            current_outfit["vecs"].append(vec)
+            current_outfit["cats"].append(ann['category_id'])
+            current_outfit["crops"].append(crop)
+            wardrobe_pool.append(item)
 
-            # 3. Extract Dominant Color
-            # quantize_colors returns [(hex, pct), ...] - we take the top one
-            dominant_colors = color_utils.quantize_colors(cropped_img, k=1)
-            primary_hex = dominant_colors[0][0] if dominant_colors else "#FFFFFF"
-            primary_pct = dominant_colors[0][1] if dominant_colors else 1.0
+        outfits.append(current_outfit)
 
-            # 4. Extract 512-dim Vector (Required for the Stylist model)
-            vector = embedder.embed_crop(cropped_img)
-
-            item_data = {
-                "category_id": garment["category_id"],
-                "attributes": attributes,
-                "color_hex": primary_hex,
-                "color_pct": primary_pct,
-                "vector": vector
-            }
-
-            outfit_items.append(item_data)
-            outfit_cats.append(garment["category_id"])
-            wardrobe_pool.append(item_data)
-
-        # Calculate Outfit Harmony using your util
-        outfit_cropped_imgs = [g["image"].convert("RGB") for g in garments]
-        harmony = color_utils.harmony_score_from_images(outfit_cropped_imgs)
-
-        processed_outfits.append({
-            "items": outfit_items,
-            "harmony_score": harmony
-        })
-        all_outfit_categories.append(outfit_cats)
-
-    # 5. Build Co-occurrence matrix for negative sampling
-    co_occurrence_matrix = build_co_occurrence_matrix(all_outfit_categories)
-
-    # 6. Serialize the dataset
-    dataset_bundle = {
-        "outfits": processed_outfits,
-        "wardrobe_pool": wardrobe_pool,
-        "co_occurrence_matrix": co_occurrence_matrix
-    }
-
-    torch.save(dataset_bundle, output_file)
-    print(f"Successfully saved {len(processed_outfits)} processed outfits to {output_file}")
+    # Serialize for training
+    torch.save({"outfits": outfits, "pool": wardrobe_pool}, output_file)
+    print(f"Dataset built: {len(outfits)} outfits, {len(wardrobe_pool)} total items.")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process Fashionpedia into Brain Layer tensors.")
-    parser.add_argument("--dataset_path", type=str, required=True, help="Path to Fashionpedia images")
-    parser.add_argument("--output", type=str, default="processed_fashion_data.pt", help="Output file path")
-
-    # Model paths
-    parser.add_argument("--det_model", type=str,
-                        default="perception_layer/clothing_detection_segmintation/output/checkpoint_best_regular.pth")
-    parser.add_argument("--attr_model", type=str,
-                        default="perception_layer/multi_attribute_classifire/runs/1b/best_model.pt")
-
-    args = parser.parse_args()
-
-    main(args.dataset_path, args.det_model, args.attr_model, args.output)
+    process_fashionpedia("../data/fashionpedia_coco/train/_annotations.coco.json", "data/fashionpedia_coco/train")

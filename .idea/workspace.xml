@@ -5,7 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Initial commit">
-      <change beforePath="$PROJECT_DIR$/Main_pipeline.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Main_pipeline.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/brain_engine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/WardrobeGenie.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/WardrobeGenie.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recomendation_engine/assembler.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/recomendation_engine/build_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/recomendation_engine/build_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recomendation_engine/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/recomendation_engine/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recomendation_engine/train_stylist.py" beforeDir="false" afterPath="$PROJECT_DIR$/recomendation_engine/train_stylist.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +66,8 @@
     "RunOnceActivity.MCP Project settings loaded": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/ridamansour/DataspellProjects/WardrobeGenie"
+    "last_opened_file_path": "/Users/ridamansour/DataspellProjects/WardrobeGenie",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">

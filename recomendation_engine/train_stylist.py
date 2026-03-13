@@ -1,62 +1,78 @@
-import os
 import torch
-from torch.utils.data import DataLoader
+import random
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from model import OutfitSetTransformer
+from perception_layer import color_utils
+from model import OutfitEmbeddingTransformer
 
 
-def train_model(train_loader, val_loader, model, epochs=20, log_dir="logs/stylist_run"):
+class TripletFashionDataset(Dataset):
+    def __init__(self, data_path):
+        data = torch.load(data_path)
+        self.outfits = data["outfits"]
+        self.pool = data["pool"]
+
+    def __len__(self):
+        return len(self.outfits)
+
+    def __getitem__(self, idx):
+        anchor = self.outfits[idx]
+        a_v = torch.stack(anchor["vecs"])
+        a_c = torch.tensor(anchor["cats"])
+
+        # Negative Generation: Swap one item to create a clash
+        neg_vecs = [v for v in anchor["vecs"]]
+        neg_cats = [c for c in anchor["cats"]]
+        swap_idx = random.randrange(len(neg_vecs))
+
+        # Hard Negative Mining: Ensure color score < 0.3
+        for _ in range(5):
+            candidate = random.choice(self.pool)
+            temp_imgs = list(anchor["crops"])
+            temp_imgs[swap_idx] = candidate["img"]
+            if color_utils.harmony_score_from_images(temp_imgs) < 0.3:
+                neg_vecs[swap_idx], neg_cats[swap_idx] = candidate["vec"], candidate["cat"]
+                break
+
+        return {"a_v": a_v, "a_c": a_c, "n_v": torch.stack(neg_vecs), "n_c": torch.tensor(neg_cats)}
+
+
+def train(data_path, epochs=100, patience=7):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
+    model = OutfitEmbeddingTransformer().to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
+    criterion = nn.TripletMarginLoss(margin=1.0, p=2)
+    writer = SummaryWriter("runs/stylist_v1")
 
-    writer = SummaryWriter(log_dir)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
-    criterion = torch.nn.MSELoss()
-
-    best_val_loss = float('inf')
-    checkpoint_path = "checkpoints/best_stylist_model.pth"
-    os.makedirs("checkpoints", exist_ok=True)
+    loader = DataLoader(TripletFashionDataset(data_path), batch_size=32, shuffle=True)
+    best_loss = float('inf')
+    counter = 0
 
     for epoch in range(epochs):
         model.train()
-        train_loss = 0.0
-
-        for item_vecs, cat_ids, targets in train_loader:
-            item_vecs, cat_ids, targets = item_vecs.to(device), cat_ids.to(device), targets.to(device)
-
+        total_loss = 0
+        for b in loader:
             optimizer.zero_grad()
-            preds = model(item_vecs, cat_ids)
-            loss = criterion(preds, targets)
-            loss.backward()
+            # In Triplet, Anchor and Positive are the same (Ground Truth)
+            emb_a = model(b['a_v'].to(device), b['a_c'].to(device))
+            emb_n = model(b['n_v'].to(device), b['n_c'].to(device))
+
+            # Loss pushes ground truth (emb_a) away from clashing mix (emb_n)
+            loss = criterion(emb_a, emb_a, emb_n)
+            loss.backward();
             optimizer.step()
-            train_loss += loss.item()
+            total_loss += loss.item()
 
-        avg_train_loss = train_loss / len(train_loader)
+        avg_loss = total_loss / len(loader)
+        writer.add_scalar("Loss/train", avg_loss, epoch)
+        print(f"Epoch {epoch}: Loss {avg_loss:.4f}")
 
-        # Validation Loop
-        model.eval()
-        val_loss = 0.0
-        with torch.no_grad():
-            for item_vecs, cat_ids, targets in val_loader:
-                item_vecs, cat_ids, targets = item_vecs.to(device), cat_ids.to(device), targets.to(device)
-                preds = model(item_vecs, cat_ids)
-                val_loss += criterion(preds, targets).item()
-
-        avg_val_loss = val_loss / len(val_loader)
-
-        # Logging to TensorBoard
-        writer.add_scalars('Loss', {'train': avg_train_loss, 'val': avg_val_loss}, epoch)
-        print(f"Epoch {epoch} | Train: {avg_train_loss:.4f} | Val: {avg_val_loss:.4f}")
-
-        # Checkpointing
-        if avg_val_loss < best_val_loss:
-            best_val_loss = avg_val_loss
-            torch.save({
-                'epoch': epoch,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'loss': best_val_loss,
-            }, checkpoint_path)
-            print(f"--> Saved New Best Model at Epoch {epoch}")
-
-    writer.close()
+        # Early Stopping
+        if avg_loss < best_loss:
+            best_loss = avg_loss;
+            counter = 0
+            torch.save(model.state_dict(), "best_stylist.pth")
+        else:
+            counter += 1
+            if counter >= patience: break
