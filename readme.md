@@ -587,7 +587,6 @@ CREATE TABLE user_profiles (
     email               TEXT,
     phone               TEXT,
     city                TEXT,
-    preferred_style     TEXT,
     clothing_size       TEXT,
     bio                 TEXT,
     profile_image_upload_id TEXT,
