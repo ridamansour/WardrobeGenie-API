@@ -597,37 +597,61 @@ All heavy training is done in the cloud (GPU):
 
 ---
 
+This update to the **Final Pipeline Flow** integrates the transition from static scoring to the **Style Space Embedding** logic. It now reflects how individual garments are processed into a unified "vibe" vector that is then compared against a dynamic user profile.
+
+---
+
 ## 7. Final Pipeline Flow
 
-### A. Wardrobe Update (Image Input)
+### A. Wardrobe Update (Offline/Ingestion)
 
-1. Run segmentation/detection
-2. Crop each garment
-3. Predict attributes
-4. Extract colors
-5. Compute/store embeddings + metadata locally
+1. **Detection & Segmentation**: Extract precise garment regions using RF-DETR.
+2. **Vectorization**: Pass crops through `GarmentEmbedder` to get 512-dim visual features.
+3. **Attribute & Color Extraction**:
+* Predict `formality_score` and `weather_warmth`.
+* Quantize colors for harmony checks.
 
-### B. User Query
 
-1. Encode query into embedding
-2. Extract intent filters
+4. **Local Indexing**: Store items in a local vector database with category and attribute metadata.
 
-### C. Candidate Filtering
+---
 
-1. Apply context filters
-2. Apply similarity ranking to select candidates
+### B. User Query (The "Trigger")
 
-### D. Outfit Generation
+1. **Semantic Encoding**: Convert text (e.g., "Dinner date in Paris") into a 512-dim query embedding using the Student-CLIP model.
+2. **Intent Parsing**: Identify required attributes (e.g., "Date" → High Formality, "Cold" → High Warmth).
 
-Combine candidates into plausible outfits (top + bottom + shoes).
+---
 
-### E. Scoring & Ranking
+### C. Candidate Filtering (Gatekeeper)
 
-1. Compatibility score (transformer)
-2. Relevance score (cosine)
-3. Final weighted score
+1. **Contextual Pruning**: Drop items that violate weather/formality constraints.
+2. **Semantic Ranking**: Score remaining items by cosine similarity to the query embedding.
+3. **Top-K Selection**: Keep the top ~40 items to prevent combinatorial explosion in the next step.
 
-### F. Learning Loop
+---
 
-Update user preference weights based on feedback.
+### D. Outfit Generation (Combinatorics)
 
+1. **Set Assembly**: Group filtered items into valid permutations (e.g., 1 Top + 1 Bottom + 1 Outerwear + 1 Shoes).
+2. **Structure Check**: Ensure category diversity (preventing an outfit of 3 shirts).
+
+---
+
+### E. Scoring & Ranking (The Brain)
+
+1. **Personalized Style Mapping**: Pass the set through the **Triplet Set-Transformer** to project the outfit into the 128-dim Style Space.
+2. **Distance Calculation**: Measure the Euclidean distance between the outfit vector ($V_{outfit}$) and the **User Taste Centroid** ($V_{user}$).
+3. **Hybrid Scoring**:
+* $S_{style} = \frac{1}{1 + \text{dist}}$
+* $S_{rel} = \text{mean similarity to query}$
+* $\text{Final} = \alpha \cdot S_{style} + \beta \cdot S_{rel}$
+
+
+
+---
+
+### F. Learning Loop (The Feedback)
+
+1. **Representation Update**: On a "Like" or "Wear" action, shift the **User Taste Centroid** toward the outfit's coordinates in the Style Space.
+2. **Behavioral Update**: Adjust the Bandit weights ($\alpha, \beta$) based on whether the user prioritized the "aesthetic vibe" or the "search relevance" of the result.
