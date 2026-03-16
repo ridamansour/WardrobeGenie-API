@@ -5,6 +5,7 @@ from PIL import Image
 from tqdm import tqdm
 from collections import defaultdict
 from representation_layer.visual_embeddings.inference import GarmentEmbedder
+from perception_layer import color_utils
 
 
 def process_fashionpedia(json_path, img_dir, output_file="processed_pool.pt"):
@@ -24,14 +25,11 @@ def process_fashionpedia(json_path, img_dir, output_file="processed_pool.pt"):
     outfits = []
     wardrobe_pool = []
 
-    # FIX: Create a directory to store the physical cropped images
     crops_dir = os.path.join(os.path.dirname(output_file), "crops")
     os.makedirs(crops_dir, exist_ok=True)
 
     print(f"Processing images in {img_dir}...")
     for img_id, anns in tqdm(anns_by_img.items()):
-        if len(anns) < 2: continue  # Ignore single-garment images
-
         img_info = images[img_id]
         img_path = os.path.join(img_dir, img_info['file_name'])
         try:
@@ -39,30 +37,42 @@ def process_fashionpedia(json_path, img_dir, output_file="processed_pool.pt"):
         except:
             continue
 
-        current_outfit = {"vecs": [], "cats": [], "crop_paths": []}
+        current_outfit = {"vecs": [], "cats": [], "crop_paths": [], "colors": []}
 
         for ann in anns:
-            # 1. Get cropped images of given bboxes
             x, y, w, h = ann['bbox']
-            crop = full_img.crop((x, y, x + w, y + h))
 
+            # Skip invalid or microscopic bounding boxes
+            if w <= 2 or h <= 2: continue
+
+            crop = full_img.crop((x, y, x + w, y + h))
             crop_filename = f"{img_id}_{ann['id']}.jpg"
             crop_path = os.path.join(crops_dir, crop_filename)
             crop.save(crop_path)
 
-            # 2. Vectorize using GarmentEmbedder
             vec = embedder.embed_crop(crop)
 
-            # FIX: Store the crop_path string instead of the PIL Image object
-            item = {"vec": vec, "cat": ann['category_id'], "crop_path": crop_path}
+            # Pre-compute colors (k=3 to match original math)
+            color_data = color_utils.quantize_colors(crop, k=3)
+
+            item = {
+                "vec": vec,
+                "cat": ann['category_id'],
+                "crop_path": crop_path,
+"color_data": color_data
+            }
+
             current_outfit["vecs"].append(vec)
             current_outfit["cats"].append(ann['category_id'])
             current_outfit["crop_paths"].append(crop_path)
+            current_outfit["colors"].append(color_data)
+
             wardrobe_pool.append(item)
 
-        outfits.append(current_outfit)
+        # Ensure we still have at least 2 valid garments after filtering bad bboxes
+        if len(current_outfit["vecs"]) >= 2:
+            outfits.append(current_outfit)
 
-    # Serialize for training (now memory-safe)
     torch.save({"outfits": outfits, "pool": wardrobe_pool}, output_file)
     print(f"Dataset built: {len(outfits)} outfits, {len(wardrobe_pool)} total items.")
 

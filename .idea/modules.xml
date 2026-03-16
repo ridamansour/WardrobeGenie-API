@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/WardrobeGenie.iml" filepath="$PROJECT_DIR$/.idea/WardrobeGenie.iml" />
+      <module fileurl="file://$PROJECT_DIR$/recomendation_engine/recomendation_engine/.idea/recomendation_engine.iml" filepath="$PROJECT_DIR$/recomendation_engine/recomendation_engine/.idea/recomendation_engine.iml" />
     </modules>
   </component>
 </project>

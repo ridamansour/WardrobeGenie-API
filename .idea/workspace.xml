@@ -4,9 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Fixed dataset generation script">
+    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Fixed color_utils.py bug for images containing less than 3 dominant colors">
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/best_stylist.pth" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/processed_pool.pt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773434343.DESKTOP-3GJ1NHV.29876.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773434807.DESKTOP-3GJ1NHV.11772.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773435394.DESKTOP-3GJ1NHV.19648.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773436126.DESKTOP-3GJ1NHV.41168.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773439407.DESKTOP-3GJ1NHV.28488.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773451935.DESKTOP-3GJ1NHV.9816.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773452736.DESKTOP-3GJ1NHV.39328.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773452810.DESKTOP-3GJ1NHV.47016.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773605735.DESKTOP-3GJ1NHV.52984.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773606235.DESKTOP-3GJ1NHV.47324.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773606292.DESKTOP-3GJ1NHV.47764.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773606921.DESKTOP-3GJ1NHV.29936.0" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/recomendation_engine/runs/stylist_v1/events.out.tfevents.1773606937.DESKTOP-3GJ1NHV.26368.0" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/WardrobeGenie.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/WardrobeGenie.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recomendation_engine/brain_engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/recomendation_engine/brain_engine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recomendation_engine/build_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/recomendation_engine/build_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recomendation_engine/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/recomendation_engine/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recomendation_engine/train_stylist.py" beforeDir="false" afterPath="$PROJECT_DIR$/recomendation_engine/train_stylist.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +87,7 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/recomendation_engine" />
     </key>
   </component>
   <component name="RunManager">
@@ -130,6 +152,7 @@
     <MESSAGE value="Initial commit" />
     <MESSAGE value="refactor: upgrade Recommendation Engine from static scoring to Style Space geometry&#10;&#10;Moved away from hard-coded compatibility scores (0.65/0.35) in favor of a &#10;Representational Learning approach. The model now maps outfits into a &#10;hypersphere where distance equals &quot;clash.&quot; Added a feedback loop that &#10;shifts a user's profile vector based on likes/dislikes, enabling &#10;true personalization." />
     <MESSAGE value="Fixed dataset generation script" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed dataset generation script" />
+    <MESSAGE value="Fixed color_utils.py bug for images containing less than 3 dominant colors" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed color_utils.py bug for images containing less than 3 dominant colors" />
   </component>
 </project>
