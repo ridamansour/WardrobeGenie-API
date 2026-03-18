@@ -1,0 +1,63 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam ArrowColor #444444
+skinparam package {
+  BorderColor #555555
+  FontStyle bold
+  FontSize 14
+}
+skinparam rectangle {
+  BorderColor #555555
+  RoundCorner 8
+  FontSize 12
+}
+
+title Multi-Attribute Derivation Flow (Zero-Shot Pseudo-Labeling)
+
+package "Input Processing" #F9F9F9 {
+  rectangle "Garment Crop\n(Tensor: 3, 224, 224)" as Image
+  rectangle "Prompt Banks\n(Fit, Style, Warmth, Formality)" as Prompts
+}
+
+package "Multimodal Alignment (CLIP)" #EAF4FF {
+  rectangle "Vision Encoder\n(ViT-B/32)" as VisEnc
+  rectangle "Text Encoder\n(Transformer)" as TxtEnc
+  rectangle "Similarity Matrix\n(Cosine Similarity Logits)" as Sim
+}
+
+package "Label Derivation Logic" #E6E6FA {
+  rectangle "Softmax Normalization\n(p = exp(zi) / Σ exp(zj))" as Softmax
+
+  package "Branch A: Categorical Targets" #DFF6DD {
+    rectangle "Fit & Style\n(Raw Prob. Distribution)" as Cat
+  }
+
+  package "Branch B: Scalar Regression Targets" #FFE4E1 {
+    rectangle "Linear Weight Mapping\nWarmth: [0.0, 0.5, 1.0]\nFormality: [1.0, 0.75 ... 0.0]" as Weights
+    rectangle "Expected Value Calculation\nE[x] = Σ (p_k * w_k)" as ExpectedVal
+  }
+}
+
+package "Output Schema (.pt)" #F8F9FA {
+  rectangle "fit: Tensor(3)\nstyle: Tensor(4)" as Out1
+  rectangle "weather_warmth: float\nformality_score: float" as Out2
+}
+
+' --- Connections ---
+Image --> VisEnc
+Prompts --> TxtEnc
+
+VisEnc --> Sim : Image Embedding (512-d)
+TxtEnc --> Sim : Prompt Embeddings (512-d)
+
+Sim --> Softmax
+Softmax --> Cat : Fit / Style
+Softmax --> ExpectedVal : Warmth / Formality
+Weights --> ExpectedVal
+
+Cat --> Out1
+ExpectedVal --> Out2
+@enduml

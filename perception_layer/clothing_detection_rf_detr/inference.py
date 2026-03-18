@@ -18,7 +18,7 @@ import numpy as np
 from PIL import Image
 import torchvision.transforms as T
 
-from perception_layer.clothing_detection_segmintation.model import load_model, CLASS_NAMES, DEVICE
+from perception_layer.clothing_detection_rf_detr.model import load_model, CLASS_NAMES, DEVICE
 
 # --------------------------------------------------
 # Utility Functions

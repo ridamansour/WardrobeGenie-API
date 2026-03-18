@@ -59,7 +59,7 @@ def process_fashionpedia(json_path, img_dir, output_file="processed_pool.pt"):
                 "vec": vec,
                 "cat": ann['category_id'],
                 "crop_path": crop_path,
-"color_data": color_data
+                "color_data": color_data
             }
 
             current_outfit["vecs"].append(vec)
