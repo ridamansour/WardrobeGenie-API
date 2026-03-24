@@ -12,7 +12,7 @@ def process_fashionpedia(json_path, img_dir, output_file="processed_pool.pt"):
     """
     Parses Fashionpedia, crops items, vectorizes them, and saves a flattened pool.
     """
-    embedder = GarmentEmbedder("../representation_layer/visual_embeddings/best_student_model.pth", device="cuda")
+    embedder = GarmentEmbedder("../models/visual_embedder/best_student_model.pth", device="cuda")
 
     with open(json_path, 'r') as f:
         data = json.load(f)

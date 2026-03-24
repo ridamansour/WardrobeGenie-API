@@ -1,7 +1,7 @@
 import torch
 from PIL import Image
 import torchvision.transforms as T
-from model import StudentEncoder
+from representation_layer.visual_embeddings.model import StudentEncoder
 
 
 class GarmentEmbedder:

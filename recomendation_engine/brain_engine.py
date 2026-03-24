@@ -1,18 +1,22 @@
+import os
 import torch
 import torch.nn.functional as F
-from typing import List, Dict
-from model import OutfitEmbeddingTransformer
+from typing import List, Dict, Optional
+from recomendation_engine.model import OutfitEmbeddingTransformer
 
 
 class FashionBrain:
-    def __init__(self, model_path: str, wardrobe_path: str, device: str = "cpu"):
+    def __init__(self, model_path: str, wardrobe_path: Optional[str] = None, device: str = "cpu"):
         self.device = torch.device(device)
         self.stylist = OutfitEmbeddingTransformer().to(self.device)
         self.stylist.load_state_dict(torch.load(model_path, map_location=self.device))
         self.stylist.eval()
 
-        data = torch.load(wardrobe_path)
-        self.wardrobe = data['pool']
+        # Safely handle the absence of a local dummy pool
+        self.wardrobe = []
+        if wardrobe_path and os.path.exists(wardrobe_path):
+            data = torch.load(wardrobe_path)
+            self.wardrobe = data.get('pool', [])
 
         # User Centroid mapping their specific taste in the 128-dim hypersphere
         self.user_centroid = torch.randn(1, 128).to(self.device)
@@ -20,12 +24,18 @@ class FashionBrain:
         self.beta = 0.4  # Weight for Query Relevance
         self.eta = 0.15  # Learning rate
 
-    def gatekeeper_filter(self, query_vec: torch.Tensor, context: Dict, top_k: int = 40):
+    def gatekeeper_filter(self, query_vec: torch.Tensor, context: Dict, pool: Optional[List[Dict]] = None,
+                          top_k: int = 40):
+        # Allow dynamic pools (like external DB search results) to override the local wardrobe
+        active_pool = pool if pool is not None else self.wardrobe
+
         candidates = []
-        for item in self.wardrobe:
+        for item in active_pool:
             # Assumes your Attribute Classifier appended warmth/formality to item
-            if abs(item.get('warmth', 0.5) - context.get('temp_score', 0.5)) > 0.4: continue
-            if abs(item.get('formality', 0.5) - context.get('formal_score', 0.5)) > 0.5: continue
+            if abs(item.get('warmth', 0.5) - context.get('temp_score', 0.5)) > 0.4:
+                continue
+            if abs(item.get('formality', 0.5) - context.get('formal_score', 0.5)) > 0.5:
+                continue
 
             relevance = F.cosine_similarity(item['vec'].unsqueeze(0), query_vec, dim=1).item()
             candidates.append({'item': item, 'rel': relevance})

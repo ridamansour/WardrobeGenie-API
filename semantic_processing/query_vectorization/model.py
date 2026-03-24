@@ -91,7 +91,7 @@ def train_distillation(queries, epochs=5, batch_size=32, lr=2e-5):
         print(f"Epoch {epoch + 1} | Average Loss: {total_loss / len(dataloader):.4f}")
 
     # Save the distilled student model
-    torch.save(student_model.state_dict(), "distilled_query_encoder.pth")
+    torch.save(student_model.state_dict(), "../../models/nlp_query/distilled_query_encoder.pth")
     print("Saved distilled model to distilled_query_encoder.pth")
 
     return student_model, student_tokenizer

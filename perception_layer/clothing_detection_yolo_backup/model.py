@@ -18,7 +18,7 @@ HUB_MODEL = "valentinafeve/yolos-fashionpedia"
 HUB_PROCESSOR = "hustvl/yolos-small"
 
 # Local Path
-LOCAL_PATH = Path("models/yolos-fashionpedia-local")
+LOCAL_PATH = Path("../../models/yolos-fashionpedia")
 
 # The 46 Fashionpedia categories
 CLASS_NAMES = [
@@ -47,10 +47,11 @@ def load_model(model_name: str = None, device: str = DEVICE):
     if model_name and os.path.isdir(model_name):
         source = model_name
         processor_source = model_name
+        print(f"Loading from local disk: {source}")
     elif LOCAL_PATH.exists():
         source = str(LOCAL_PATH)
         processor_source = str(LOCAL_PATH)
-        print(f"Loading from local disk: {source}")
+        print(f"Loading from default local disk: {source}")
     else:
         source = HUB_MODEL
         processor_source = HUB_PROCESSOR

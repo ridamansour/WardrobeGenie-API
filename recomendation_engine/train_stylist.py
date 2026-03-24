@@ -80,7 +80,7 @@ def train(data_path, epochs=100, patience=7, batch_size=8):
     model = OutfitEmbeddingTransformer().to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
     criterion = nn.TripletMarginLoss(margin=1.0, p=2)
-    writer = SummaryWriter("runs/stylist_v1")
+    writer = SummaryWriter("../models/stylist_brain/runs/stylist_v1")
 
     full_dataset = TripletFashionDataset(data_path)
     val_size = int(0.2 * len(full_dataset))
@@ -127,7 +127,7 @@ def train(data_path, epochs=100, patience=7, batch_size=8):
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             counter = 0
-            torch.save(model.state_dict(), "best_stylist.pth")
+            torch.save(model.state_dict(), "../models/stylist_brain/best_stylist.pth")
             print("  -> Saved new best model")
         else:
             counter += 1

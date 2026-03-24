@@ -10,7 +10,7 @@ def train_model(train_dir, valid_dir, epochs=50, batch_size=128, patience=5):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 1. Initialize TensorBoard Writer
-    writer = SummaryWriter(log_dir="runs/student_distillation")
+    writer = SummaryWriter(log_dir="../../models/visual_embedder/runs/student_distillation")
 
     # Load pre-computed dataset
     train_ds = FashionpediaCropDataset(train_dir)
@@ -72,7 +72,7 @@ def train_model(train_dir, valid_dir, epochs=50, batch_size=128, patience=5):
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             epochs_without_improvement = 0
-            torch.save(student.state_dict(), "best_student_model.pth")
+            torch.save(student.state_dict(), "../../models/visual_embedder/best_student_model.pth")
             print("  --> New best model saved!")
         else:
             epochs_without_improvement += 1

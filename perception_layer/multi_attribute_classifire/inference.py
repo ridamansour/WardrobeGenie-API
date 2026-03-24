@@ -9,7 +9,7 @@ Usage
 -----
     from 1b_inference import AttributePredictor
 
-    predictor = AttributePredictor("runs/1b/best_model.pt")
+    predictor = AttributePredictor("attribute_predictor/1b/best_model.pt")
     result    = predictor.predict(pil_image, category_id=1)
     # {
     #   "fit":             [0.05, 0.85, 0.10],   # slim / regular / oversized
@@ -93,7 +93,7 @@ class AttributePredictor:
         }
 
 if __name__ == "__main__":
-    predictor = AttributePredictor("runs/1b/best_model.pt")
+    predictor = AttributePredictor("../../models/attribute_predictor/1b/best_model.pt")
     image = Image.open("../../examples/ex5.jpeg")
     result = predictor.predict(image, category_id=1)
     print(result)

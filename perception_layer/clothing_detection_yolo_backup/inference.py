@@ -46,9 +46,9 @@ def rescale_bboxes(out_bbox, size):
 # --------------------------------------------------
 
 class GarmentDetector:
-    def __init__(self, model_path: str = None):
+    def __init__(self, model_path: str = "../../models/yolos-fashionpedia/"):
         # We use the model_path if provided, else the default from model.py
-        self.model, self.processor = load_model(device=DEVICE)
+        self.model, self.processor = load_model(model_path, device=DEVICE)
         self.model.eval()
 
     @torch.no_grad()

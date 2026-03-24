@@ -17,7 +17,7 @@ Usage
     python train.py \
         --train_dir  attribute_dataset/train \
         --valid_dir  attribute_dataset/valid \
-        --output_dir runs/1b \
+        --output_dir attribute_predictor/1b \
         --epochs 30 \
         --batch_size 64 \
         --lr 3e-4
@@ -261,8 +261,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--train_dir", required=True)
     parser.add_argument("--valid_dir", required=True)
-    parser.add_argument("--output_dir", default="runs/1b")
-    parser.add_argument("--log_dir", default="runs/tensorboard")
+    parser.add_argument("--output_dir", default="attribute_predictor/1b")
+    parser.add_argument("--log_dir", default="attribute_predictor/tensorboard")
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--lr", type=float, default=3e-4)

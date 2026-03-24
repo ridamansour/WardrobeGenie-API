@@ -6,7 +6,7 @@ MODEL_NAME = "valentinafeve/yolos-fashionpedia"
 PROCESSOR_NAME = "hustvl/yolos-small"
 
 # Define where you want to save them locally
-LOCAL_DIR = "./models/yolos-fashionpedia-local"
+LOCAL_DIR = "../../models/yolos-fashionpedia"
 
 
 def download_and_save_locally():

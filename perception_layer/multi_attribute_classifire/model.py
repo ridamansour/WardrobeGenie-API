@@ -86,7 +86,7 @@ class MultiHeadAttributeClassifier(nn.Module):
             nn.Linear(in_dim, 64),
             nn.SiLU(),
             nn.Linear(64, 1),
-            nn.Sigmoid(),   # output ∈ [0, 1]
+            nn.Sigmoid(),   # rf_detr_fasionopedia ∈ [0, 1]
         )
 
     # ── Forward ───────────────────────────────────────────────────────────────
