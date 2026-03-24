@@ -1,0 +1,79 @@
+@startuml
+top to bottom direction
+title "User Input Pipeline"
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+skinparam ArrowColor #444444
+skinparam package {
+  BorderColor #555555
+  FontStyle bold
+  FontSize 20
+}
+skinparam rectangle {
+  BorderColor #555555
+  RoundCorner 8
+  FontSize 17
+}
+skinparam database {
+  BorderColor #555555
+  FontSize 17
+}
+
+rectangle "User Input\n(Image, Text Query, Context)" as UI #F5F5F5
+
+package "1. Perception & NLP Layer" #D9ECFF {
+  rectangle "RF-DETR Nano Detection\n(Detect & Crop)" as CV1 #EAF4FF
+  rectangle "Attribute & Color Analysis\n(EfficientNet + K-Means)" as CV2 #EAF4FF
+  rectangle "Embeddings Generator\n(Student CLIP / MobileCLIP)" as Embed #EAF4FF
+  rectangle "Intent Extraction\n(Zero-Shot Text Filter)" as NLP #FFF8D6
+}
+
+package "2. Representation & Storage" #DFF6DD {
+  database "Local Wardrobe DB\n(Items, Attributes, 512-dim Vectors)" as DB_Items #EEFAEC
+  database "User Profile State\n(Taste Centroid, Bandit Weights)" as DB_User #F1EAFF
+}
+
+package "3. The Brain (Scoring Engine)" #D9F2D9 {
+  rectangle "Gatekeeper Pre-Filter\n(Semantic + Boolean Rules)" as B1 #EDF9ED
+  rectangle "Outfit Assembler\n(Top + Bottom + Shoes)" as B2 #EDF9ED
+  rectangle "Set-Transformer Stylist\n(128-dim Style Space Mapping)" as B3 #EDF9ED
+  rectangle "Final Hybrid Ranker\n(Style Distance + Query Relevance)" as B4 #EDF9ED
+}
+
+package "4. Feedback & Learning Loop" #FAD9E8 {
+  rectangle "Recommendation UI\n(Ranked Outfits)" as Out #FDEAF3
+  rectangle "User Feedback\n(Like / Wear / Dislike)" as Feedback #FDEAF3
+  rectangle "Dynamic Personalization\n(Update Centroid & Weights)" as Learn #FDEAF3
+}
+
+' --- Relationships / Data Flow ---
+
+UI --> CV1 : Image
+UI --> NLP : Text / Context
+UI --> Embed : Text
+
+CV1 --> CV2 : Cropped Items
+CV1 --> Embed : Cropped Items
+
+CV2 --> DB_Items : Metadata & Colors
+Embed --> DB_Items : Visual Vectors
+Embed --> B1 : Query Vector
+NLP --> B1 : Hard Filters
+
+DB_Items --> B1 : Candidate Items
+DB_User --> B1 : User Context
+
+B1 --> B2 : Top-K Pruned Items
+B2 --> B3 : Valid Combinations
+B3 --> B4 : Outfit Vector (V_outfit)
+DB_User --> B4 : V_user, Alpha, Beta
+B4 --> Out : Final Scores
+
+Out --> Feedback : User Interaction
+Feedback --> Learn : Reward (+1 / -1)
+B3 --> Learn : Outfit Context
+Learn --> DB_User : Shift Centroid & Balance
+
+@enduml

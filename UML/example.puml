@@ -1,0 +1,114 @@
+@startuml
+
+skinparam backgroundColor white
+skinparam shadowing false
+
+skinparam defaultTextAlignment center
+skinparam ArrowColor #444444
+skinparam package {
+  BorderColor #555555
+  FontStyle bold
+  FontSize 14
+}
+skinparam rectangle {
+  BorderColor #555555
+  RoundCorner 8
+  FontSize 12
+}
+skinparam database {
+  BorderColor #555555
+  FontSize 12
+}
+
+rectangle "User Inputs\n\n- Clothing Image\n- Text Query\n- Occasion / Weather / Mood" as UI #F5F5F5
+
+package "1. Perception Layer\n(Image Processing)" #D9ECFF {
+  rectangle "Clothing Detection & Segmentation\nRF-DETR Segmentation Nano\n\nDetect garments + bbox + mask + crop" as P1 #EAF4FF
+  rectangle "Multi-Attribute Classifier\nEfficientNet-B0 Multi-Head\n\nfit, style, weather_warmth,\nformality_score" as P2 #EAF4FF
+  rectangle "Color Quantizer\nK-Means Clustering\n\nDominant colors + percentages" as P3 #EAF4FF
+  rectangle "Dominant Color Selector\nFunction / Thresholding\n\nCompact color list for scoring" as P4 #EAF4FF
+  rectangle "Visual Embeddings\nStudent CLIP / MobileNetV3\n\n512-dim normalized image vector" as P5 #EAF4FF
+  rectangle "On-Device Deployment\nTFLite / CoreML + Quantization" as P6 #EAF4FF
+}
+
+package "2. Textual Query Understanding\n(Semantic Processing)" #FFF1B8 {
+  rectangle "Query Vectorization\nDistilled BERT / MobileCLIP\n\n512-dim query embedding" as T1 #FFF8D6
+  rectangle "Intent & Filter Extraction\nZero-Shot Text Classification\n\nformal / casual / office /\nrainy / warm / sporty" as T2 #FFF8D6
+  rectangle "Hybrid Filtering Signals\n\nsemantic similarity +\nboolean/context rules" as T3 #FFF8D6
+}
+
+package "3. Representation Layer\n(Vectorization + Retrieval)" #DFF6DD {
+  rectangle "Feature Assembly\n\nmerge embeddings + attributes +\ncolors + metadata" as R1 #EEFAEC
+  rectangle "Shared Embedding Space\n\ntext/image aligned in 512-dim" as R2 #EEFAEC
+  database "Local Vector Store\n\nSQLite / local ANN index\nitem_id + embedding + metadata" as R3 #EEFAEC
+}
+
+package "4. Brain Layer\n(Recommendation Engine)" #D9F2D9 {
+  rectangle "Context-Aware Pre-Filter\nGatekeeper\n\nweather/formality pruning +\nsemantic retrieval" as B1 #EDF9ED
+  rectangle "Outfit Generation\n\nvalid combinations\n(top + bottom + outerwear + shoes)" as B2 #EDF9ED
+  rectangle "Outfit Compatibility Model\nTriplet Set-Transformer\n\nN items -> 128-dim outfit embedding" as B3 #EDF9ED
+  rectangle "Final Ranking\n\nS_style + S_rel\nfinal = alpha*S_style + beta*S_rel" as B4 #EDF9ED
+}
+
+package "5. Personalized Recommendations\n+ Learning Loop" #FAD9E8 {
+  rectangle "Recommendations Output\n\nranked outfits + explanation + score" as O1 #FDEAF3
+  rectangle "Feedback Events\n\nLike / Wear / Skip / Dislike" as L1 #FDEAF3
+  rectangle "Taste Centroid Update\n\nupdate V_user in 128-dim style space" as L2 #FDEAF3
+  rectangle "Bandit Weight Update\n\nadjust alpha / beta\nstyle vs relevance" as L3 #FDEAF3
+}
+
+package "6. Data Storage" #E6D9FF {
+  database "Users\n\nsettings + personalization_state\nalpha, beta, taste_centroid" as D1 #F1EAFF
+  database "WardrobeItems\n\nmetadata + ml_features\nembedding + colors + scores" as D2 #F1EAFF
+  database "AnalysisSessions" as D3 #F1EAFF
+  database "Recommendations" as D4 #F1EAFF
+  database "SavedOutfits" as D5 #F1EAFF
+  database "FeedbackEvents" as D6 #F1EAFF
+}
+
+UI --> P1 : clothing image
+P1 --> P2 : cropped garments
+P1 --> P3 : cropped garments
+P1 --> P5 : normalized crops
+P3 --> P4 : color clusters
+
+P2 --> R1 : attributes
+P4 --> R1 : dominant colors
+P5 --> R1 : visual embeddings
+R1 --> R2
+R1 --> R3 : store item vectors
+R1 --> D2 : persist wardrobe item data
+
+UI --> T1 : text query
+UI --> T2 : context input
+T1 --> T2
+T1 --> T3
+T2 --> T3
+T1 --> R2 : text embedding
+
+R3 --> B1 : candidate items
+T3 --> B1 : semantic + boolean filters
+D1 --> B1 : user preferences
+B1 --> B2 : top-k candidates
+B2 --> B3 : outfit sets
+B3 --> B4 : V_outfit
+D1 --> B4 : V_user, alpha, beta
+T1 --> B4 : query relevance
+B4 --> O1 : final ranking
+
+UI --> D3 : session context
+O1 --> D4 : recommendation results
+D4 --> D5 : saved outfits
+O1 --> L1 : user interaction
+L1 --> D6 : feedback event
+L1 --> L2
+L1 --> L3
+B3 --> L2 : outfit embedding
+B4 --> L3 : S_style / S_rel
+L2 --> D1 : update taste centroid
+L3 --> D1 : update alpha, beta
+
+P6 ..> P1 : deploy
+P6 ..> P2 : deploy
+P6 ..> P5 : deploy
+@enduml

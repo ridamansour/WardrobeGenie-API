@@ -1,0 +1,126 @@
+@startuml
+title "Dataset Generation"
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam ArrowColor #444444
+
+skinparam package {
+  BorderColor #555555
+  FontStyle bold
+  FontSize 15
+}
+skinparam rectangle {
+  BorderColor #555555
+  RoundCorner 8
+  FontSize 15
+}
+skinparam database {
+  BorderColor #336699
+  BackgroundColor #EAF4FF
+  FontSize 15
+}
+skinparam note {
+  BackgroundColor #FFF8D6
+  BorderColor #D4C270
+  FontSize 15
+  TextAlignment left
+}
+
+' --- External Sources ---
+database "Hugging Face\nFashionpedia" as HF #F5F5F5
+rectangle "Procedural Rules\n(Templates, Vocab, Typos)" as SynRules #F5F5F5
+
+' --- 1. Base CV Dataset ---
+package "1. Base Detection Dataset" #DFF6DD {
+  rectangle "HF to COCO Converter\n- Extract bounding boxes\n- Map [ymin, xmin, ymax, xmax] -> [x, y, w, h]\n- Enforce 70/20/10 Split" as Script1 #EEFAEC
+  database "COCO Dataset\n(Images + JSON)" as COCO #EEFAEC
+
+  note bottom of COCO
+    **Schema:**
+    images: [{id, width, height, file_name}]
+    annotations: [{image_id, category_id, bbox, area}]
+    categories: [{id, name="class_N"}]
+  end note
+}
+
+' --- 2. Multi-Attribute Pseudo-Labeling ---
+package "2. Attribute Pseudo-Labeling" #E6E6FA {
+  rectangle "Garment Cropper\n(Filter w,h < 32px)" as Crop1 #F4F4FD
+  rectangle "CLIP Zero-Shot Labeler\n- Extract Image & Text Embeddings\n- Calc Cosine Similarity" as Script2 #F4F4FD
+  database "Attribute Dataset\n(.pt per garment)" as AttrDB #F4F4FD
+
+  note bottom of AttrDB
+    **Generated Labels:**
+    + image: Tensor(3, 224, 224)
+    + fit: Tensor(3) [Softmax Probs]
+    + style: Tensor(4) [Softmax Probs]
+    + weather_warmth: float [Expected Value]
+    + formality_score: float [Expected Value]
+  end note
+}
+
+' --- 3. Knowledge Distillation Prep ---
+package "3. Teacher Embedding Generation" #FFE4E1 {
+  rectangle "Garment Cropper" as Crop2 #FFF0F5
+  rectangle "TeacherEncoder Inference\n(Heavy CLIP ViT)" as Script3 #FFF0F5
+  database "Teacher Embeddings\n(.pt per garment)" as TeachDB #FFF0F5
+
+  note bottom of TeachDB
+    **Target Data:**
+    + embedding: Tensor(512)
+    (Used as Ground Truth for MobileNet)
+  end note
+}
+
+' --- 4. Recommendation Pool ---
+package "4. Recommendation Engine Pool" #E0FFFF {
+  rectangle "Feature Extraction\n- Student MobileNet (512-dim)\n- K-Means Color Quantizer (k=3)" as Script4 #F0FFFF
+  rectangle "Combinatorial Grouper\n- Group by original image_id\n- Require >= 2 valid items" as Group #F0FFFF
+  database "Processed Pool\n(processed_pool.pt)" as PoolDB #F0FFFF
+
+  note bottom of PoolDB
+    **Outfit Schema:**
+    [{
+      vecs: List[Tensor(512)],
+      cats: List[int],
+      crop_paths: List[str],
+      colors: List[Hex, %]
+    }]
+  end note
+}
+
+' --- 5. NLP Query Generation ---
+package "5. Semantic Query Generation" #FFFACD {
+  rectangle "Template Engine\n(Garment + Color + Context)" as Script5 #FFFFE0
+  rectangle "Noise Injector\n- EU/US Spelling Variants\n- Keyboard Proximity Typos\n- Random Deletions" as Noise #FFFFE0
+  database "Realistic Queries\n(.txt file)" as QueryDB #FFFFE0
+
+  note bottom of QueryDB
+    **Example Outputs:**
+    - "smart casual blazer for date night"
+    - "jakcet for winetr" (noisy)
+  end note
+}
+
+' --- Relationships ---
+HF --> Script1 : Raw Dataset Download
+Script1 --> COCO : JSON Serialization
+
+COCO --> Crop1 : Read bbox & category
+Crop1 --> Script2 : PIL Crops
+Script2 --> AttrDB : Softmax & Weights Math
+
+COCO --> Crop2 : Read bbox
+Crop2 --> Script3 : PIL Crops
+Script3 --> TeachDB : Forward Pass (no_grad)
+
+COCO --> Script4 : Annotations & Images
+Script4 --> Group : Vectors + Color Hexes
+Group --> PoolDB : Dictionary Assembly
+
+SynRules --> Script5 : Base Logic
+Script5 --> Noise : Perfect Queries
+Noise --> QueryDB : String Manipulation
+
+@enduml

@@ -1,0 +1,85 @@
+@startuml
+!theme plain
+hide circle
+skinparam linetype ortho
+skinparam roundcorner 5
+
+title Entity-Relationship Diagram: score_engine_db
+
+entity "Users" as users {
+  * _id : string <<PK>>
+  --
+  created_at : datetime
+  profile : object
+  settings : object
+  personalization_state : object
+}
+
+entity "WardrobeItems" as items {
+  * _id : string <<PK>>
+  --
+  * owner_user_id : string <<FK>>
+  image_url : string
+  core_info : object
+  attributes : object
+  ml_features : object
+  status : object
+}
+
+entity "AnalysisSessions" as sessions {
+  * _id : string <<PK>>
+  --
+  * owner_user_id : string <<FK>>
+  created_at : datetime
+  ui_state : string
+  context_input : object
+  outfit_input : object
+}
+
+entity "Recommendations" as recs {
+  * _id : string <<PK>>
+  --
+  * session_id : string <<FK>>
+  * owner_user_id : string <<FK>>
+  created_at : datetime
+  results : array[object] <<contains WardrobeItem IDs>>
+}
+
+entity "SavedOutfits" as saved {
+  * _id : string <<PK>>
+  --
+  * owner_user_id : string <<FK>>
+  * recommendation_id : string <<FK>>
+  rank_index_saved : number
+  context_snapshot : string
+  color_palette_snapshot : array[string]
+  items : array[string] <<FK>>
+  saved_at : datetime
+}
+
+entity "FeedbackEvents" as feedback {
+  * _id : string <<PK>>
+  --
+  * owner_user_id : string <<FK>>
+  * recommendation_id : string <<FK>>
+  outfit_rank_index : number
+  action : string
+  reward_value : number
+  created_at : datetime
+}
+
+' Relationships
+users ||--o{ items : "owns"
+users ||--o{ sessions : "initiates"
+users ||--o{ recs : "receives"
+users ||--o{ saved : "saves"
+users ||--o{ feedback : "provides"
+
+sessions ||--o| recs : "generates"
+recs ||--o{ saved : "sourced from"
+recs ||--o{ feedback : "receives feedback"
+
+items }o..o{ recs : "included in results array"
+items }o..o{ saved : "included in items array"
+
+@enduml
