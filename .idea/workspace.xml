@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Side Created UML diagrams for entity-relationship and pipeline diagrams">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
+    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Updated CI pipeline to work with Python 3.12">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_api.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -278,6 +278,7 @@
     <MESSAGE value="Created a test_api.py file with mock data to test API (without the models)" />
     <MESSAGE value="Finalized the readme.md file" />
     <MESSAGE value="Side Created UML diagrams for entity-relationship and pipeline diagrams" />
-    <option name="LAST_COMMIT_MESSAGE" value="Side Created UML diagrams for entity-relationship and pipeline diagrams" />
+    <MESSAGE value="Updated CI pipeline to work with Python 3.12" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated CI pipeline to work with Python 3.12" />
   </component>
 </project>
