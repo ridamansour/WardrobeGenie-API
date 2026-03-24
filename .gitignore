@@ -1,0 +1,9 @@
+# --- Airflow ---
+airflow.cfg
+airflow.db
+unittests.cfg
+webserver_config.py
+*.pid
+logs/
+data/
+.idea/
