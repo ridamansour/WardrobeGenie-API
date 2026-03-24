@@ -4,32 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Reorganized models placements to one unified /models directory">
-      <change afterPath="$PROJECT_DIR$/.dockerignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jsonSchemas.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dags/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dags/wg_batch_ingestion.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dags/wg_continuous_training.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dags/wg_data_synthesis.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db_schema.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose-airflow.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose-api.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/init_qdrant.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/fetch_from_s3_or_api.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/seed_qdrant.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/test_api.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/webserver_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/WardrobeGenie.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/WardrobeGenie.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Side Created UML diagrams for entity-relationship and pipeline diagrams">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main_pipeline.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Main_pipeline.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Prototyping.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Prototyping.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recomendation_engine/processed_pool.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rf-detr-nano.pth" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +20,7 @@
     </option>
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="9290" />
+    <option name="cachedIndexableFilesCount" value="9291" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="FileTemplateManagerImpl">
@@ -296,6 +273,11 @@
     <MESSAGE value="Created a new CI pipeline" />
     <MESSAGE value="Updated paths accordingly for the `models` directory structure." />
     <MESSAGE value="Reorganized models placements to one unified /models directory" />
-    <option name="LAST_COMMIT_MESSAGE" value="Reorganized models placements to one unified /models directory" />
+    <MESSAGE value="Implemented containerized RAG backend with Airflow and Qdrant&#10;&#10;- Dockerized the entire MLOps infrastructure with strict separation of concerns between the online serving stack and offline orchestration stack.&#10;- Built asynchronous FastAPI gateway (`main.py`) to handle live inference, image perception, and reinforcement learning feedback.&#10;- Integrated Qdrant Vector Database to replace static PyTorch memory files, enabling hardware-accelerated 512-dim ANN semantic search.&#10;- Orchestrated Apache Airflow (`docker-compose-airflow.yml`) for batch data ingestion, feature extraction, and continuous model retraining.&#10;- Added `scripts/` directory containing production data ingestion and Qdrant seeding logic.&#10;- Implemented mocked CI/CD Pytest pipeline for headless GitHub Actions validation." />
+    <MESSAGE value="Updates on `Prototyping.ipynb` and `Main_pipeline.ipynb` to the test the inference and model loading functions" />
+    <MESSAGE value="Created a test_api.py file with mock data to test API (without the models)" />
+    <MESSAGE value="Finalized the readme.md file" />
+    <MESSAGE value="Side Created UML diagrams for entity-relationship and pipeline diagrams" />
+    <option name="LAST_COMMIT_MESSAGE" value="Side Created UML diagrams for entity-relationship and pipeline diagrams" />
   </component>
 </project>
