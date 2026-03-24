@@ -323,17 +323,19 @@ async def analyze_outfit(image: UploadFile = File(...)):
                                        s_rel=s_rel)
 
 
-
-
-
-@app.post("/recommend/search")
+@app.post("/recommend/search", response_model=RecommendFullResponse, tags=["Recommendation"])
 def recommend_from_qdrant(payload: RecommendSearchRequest):
     qdrant: QdrantClient = ml_models['qdrant']
     intent_extractor: IntentExtractor = ml_models['intent_extractor']
 
+    brain: FashionBrain = ml_models['brain']
+
     # 1. Convert text "date night" into a 512-dim mathematical vector
     q_vec = intent_extractor.vectorizer.vectorize(payload.query)
     q_vec_list = q_vec.squeeze().tolist()
+
+    # FIX 2: Create the PyTorch tensor variant for the brain to score
+    q_vec_tensor = torch.tensor(q_vec).to(DEVICE)
 
     # 2. Ask Qdrant for the top 100 closest visual matches in milliseconds
     search_results = qdrant.search(

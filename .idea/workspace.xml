@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Updated test_api.py to test the api with mock objects and validate">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/ci.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/ci.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Updated test_api.py to test the api with `MagicMock()`&#10;&#10;Updated CI pipline to check for syntax errors" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -280,6 +277,7 @@
     <MESSAGE value="Side Created UML diagrams for entity-relationship and pipeline diagrams" />
     <MESSAGE value="Updated CI pipeline to work with Python 3.12" />
     <MESSAGE value="Updated test_api.py to test the api with mock objects and validate" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated test_api.py to test the api with mock objects and validate" />
+    <MESSAGE value="Updated test_api.py to test the api with `MagicMock()`&#10;&#10;Updated CI pipline to check for syntax errors" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated test_api.py to test the api with `MagicMock()`&#10;&#10;Updated CI pipline to check for syntax errors" />
   </component>
 </project>
