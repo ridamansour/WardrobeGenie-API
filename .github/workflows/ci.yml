@@ -32,6 +32,5 @@ jobs:
         pip install pytest httpx
 
     # 4. Run the Pytest suite
-    - name: Run Pytest
-      run: |
-        pytest tests/ -v
+    - name: Run tests
+      run: python -m pytest tests/
