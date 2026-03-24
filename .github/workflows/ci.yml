@@ -1,6 +1,5 @@
-name: WardrobeGenie CI Pipeline
+name: WardrobeGenie CI
 
-# Trigger the pipeline on pushes or pull requests to the main branch
 on:
   push:
     branches: [ "main" ]
@@ -8,29 +7,62 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test-api:
+  # ==========================================
+  # STAGE 1: FAST FAIL (Syntax & Linting)
+  # ==========================================
+  lint:
+    name: Code Quality Check
     runs-on: ubuntu-latest
-
     steps:
-    # 1. Grab the code from the repository
-    - name: Checkout Code
+    - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # 2. Set up a clean Python environment
     - name: Set up Python 3.12
       uses: actions/setup-python@v5
       with:
         python-version: "3.12"
-        cache: 'pip' # Speeds up future runs by caching dependencies
 
-    # 3. Install dependencies
-    - name: Install Dependencies
+    - name: Install Flake8 Linter
       run: |
         python -m pip install --upgrade pip
-        # We install standard requirements PLUS the testing tools
+        pip install flake8
+
+    - name: Check for fatal syntax errors
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  # ==========================================
+  # STAGE 2: ISOLATED LOGIC (Unit Testing)
+  # ==========================================
+  test:
+    name: API Routing & Validation
+    needs: lint  # This explicitly tells GitHub to wait for 'lint' to pass before starting
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: 'pip'  # Tells GitHub to cache your 5GB of PyTorch downloads so future runs are instantly fast!
+
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0  # Required for OpenCV/Vision libraries
+
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest httpx
 
-    # 4. Run the Pytest suite
-    - name: Run tests
-      run: python -m pytest tests/
+    - name: Execute Pytest Suite
+      # Injects the current working directory into the path so 'main.py' is always found
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+      run: |
+        python -m pytest tests/ -v
