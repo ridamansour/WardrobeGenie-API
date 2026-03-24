@@ -1,0 +1,159 @@
+{
+  "database_name": "score_engine_db",
+  "collections": {
+    "Users": {
+      "description": "User profile, UI settings mappings, and personalization states.",
+      "document_structure": {
+        "_id": "user_101010",
+        "created_at": "2026-03-15T10:00:00Z",
+        "profile": {
+          "display_name": "Alex",
+          "email": "alex@example.com",
+          "profile_image_url": "/uploads/avatars/alex.jpg"
+        },
+        "settings": {
+          "appearance": {
+            "theme": "dark",
+            "accent_color": "#FF5733",
+            "compact_density": false
+          },
+          "wardrobe_preferences": {
+            "default_view_mode": "deck",
+            "confirm_before_delete": true,
+            "auto_open_details": false
+          },
+          "analysis_preferences": {
+            "auto_detect_on_upload": true,
+            "show_explanations": true
+          }
+        },
+        "personalization_state": {
+          "alpha_weight": 0.70,
+          "beta_weight": 0.30,
+          "taste_centroid": [0.12, -0.45, 0.88, "... (128-dim Style Space vector)"],
+          "updated_at": "2026-03-15T10:05:00Z"
+        }
+      }
+    },
+
+    "WardrobeItems": {
+      "description": "The user's garment inventory, combining UI-editable factual metadata with ML-extracted features.",
+      "document_structure": {
+        "_id": "item_abc123",
+        "owner_user_id": "user_101010",
+        "image_url": "/uploads/garments/shirt_1.jpg",
+        "core_info": {
+          "name": "Vintage Flannel",
+          "category": "top",
+          "formality": "casual",
+          "primary_color": "red",
+          "secondary_color": "black"
+        },
+        "attributes": {
+          "material": "cotton",
+          "pattern": "plaid",
+          "seasons": ["fall", "winter"],
+          "tags": ["weekend", "comfy"],
+          "notes": "Shrinks in the dryer."
+        },
+        "ml_features": {
+          "visual_embedding": [0.04, 0.91, -0.11, "... (512-dim normalized vector)"],
+          "dominant_colors": [
+            { "hex_code": "#8B0000", "percentage": 0.70 },
+            { "hex_code": "#000000", "percentage": 0.30 }
+          ],
+          "weather_warmth": 0.75,
+          "formality_score": 0.20,
+          "confidences": {
+            "detection": 0.96,
+            "color": 0.88
+          }
+        },
+        "status": {
+          "is_active": true,
+          "created_at": "2026-03-15T10:10:00Z"
+        }
+      }
+    },
+
+    "AnalysisSessions": {
+      "description": "Powers the Analysis History page and tracks Dashboard states (including Clarification Required states).",
+      "document_structure": {
+        "_id": "session_999",
+        "owner_user_id": "user_101010",
+        "created_at": "2026-03-15T14:30:00Z",
+        "ui_state": "DashboardResultsReady",
+        "context_input": {
+          "occasion_label": "Date night",
+          "style_intent": "elegant",
+          "weather_text": "chilly"
+        },
+        "outfit_input": {
+          "source_type": "manual_selection",
+          "photo_upload_id": null,
+          "garments": {
+            "top": null,
+            "bottom": "item_def456",
+            "shoes": "item_ghi789"
+          },
+          "is_complete": false
+        }
+      }
+    },
+
+    "Recommendations": {
+      "description": "The output of the scoring engine, feeding the RecommendationsPanel and RecommendationCard UI.",
+      "document_structure": {
+        "_id": "rec_555",
+        "session_id": "session_999",
+        "owner_user_id": "user_101010",
+        "created_at": "2026-03-15T14:31:00Z",
+        "results": [
+          {
+            "rank_index": 1,
+            "title": "Monochrome Minimalism",
+            "final_score": 92,
+            "explanation": "High neutral palette compatibility and perfect warmth for chilly weather.",
+            "outfit_embedding": [0.15, -0.40, 0.82, "... (128-dim)"],
+            "items": [
+              { "wardrobe_item_id": "item_abc123", "category": "top" },
+              { "wardrobe_item_id": "item_def456", "category": "bottom" },
+              { "wardrobe_item_id": "item_ghi789", "category": "shoes" }
+            ]
+          }
+        ]
+      }
+    },
+
+    "SavedOutfits": {
+      "description": "Powers the Saved Outfits page, preserving recommendations for future re-runs.",
+      "document_structure": {
+        "_id": "saved_777",
+        "owner_user_id": "user_101010",
+        "recommendation_id": "rec_555",
+        "rank_index_saved": 1,
+        "context_snapshot": "Date night, elegant, chilly",
+        "color_palette_snapshot": ["#8B0000", "#000000", "#FFFFFF"],
+        "items": [
+          "item_abc123",
+          "item_def456",
+          "item_ghi789"
+        ],
+        "saved_at": "2026-03-15T14:35:00Z"
+      }
+    },
+
+    "FeedbackEvents": {
+      "description": "Captures the explicit 👍/👎 actions from the UI to trigger personalization weight updates.",
+      "document_structure": {
+        "_id": "feedback_333",
+        "owner_user_id": "user_101010",
+        "recommendation_id": "rec_555",
+        "outfit_rank_index": 1,
+        "action": "approval",
+        "reward_value": 1.0,
+        "created_at": "2026-03-15T14:34:00Z"
+      }
+    }
+  }
+}

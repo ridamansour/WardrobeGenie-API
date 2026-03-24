@@ -4,85 +4,46 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="trained the stylist model">
-      <change afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0069.pth" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_yolo_backup/download_model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_yolo_backup/inference.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_yolo_backup/model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/best_model.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/epoch_1.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/epoch_2.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/epoch_3.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/epoch_4.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/epoch_5.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/epoch_6.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/epoch_7.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/epoch_8.pt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/1b/history.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs2/tensorboard/events.out.tfevents.1772495503.DESKTOP-3GJ1NHV.44804.0" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    <list default="true" id="80c292f8-6a2e-4dd2-91b7-3b24fcbd404a" name="Changes" comment="Reorganized models placements to one unified /models directory">
+      <change afterPath="$PROJECT_DIR$/.dockerignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jsonSchemas.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dags/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dags/wg_batch_ingestion.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dags/wg_continuous_training.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dags/wg_data_synthesis.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/db_schema.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker-compose-airflow.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker-compose-api.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/init_qdrant.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/fetch_from_s3_or_api.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/seed_qdrant.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/test_api.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/webserver_config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/WardrobeGenie.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/WardrobeGenie.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main_pipeline.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Main_pipeline.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Prototyping.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Prototyping.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/dataset_generation.py" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/dataset_generation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/inference.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0004.pth" beforeDir="false" afterPath="$PROJECT_DIR$/UML/Multi-Attribute-Classifire.puml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0009.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0004.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0014.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0014.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0019.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0009.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0024.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0019.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0029.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0024.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0034.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0029.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0039.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0034.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0044.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0039.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0049.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0044.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0054.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0054.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0059.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0059.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0064.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0049.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint0069.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint0064.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint_best_ema.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint_best_ema.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/checkpoint_best_regular.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/checkpoint_best_regular.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/eval/000.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/eval/000.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/eval/050.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/eval/050.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/eval/latest.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/eval/latest.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/events.out.tfevents.1771879297.DESKTOP-3GJ1NHV.21220.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/events.out.tfevents.1771879297.DESKTOP-3GJ1NHV.21220.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/events.out.tfevents.1771879494.DESKTOP-3GJ1NHV.42068.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/events.out.tfevents.1771879494.DESKTOP-3GJ1NHV.42068.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/events.out.tfevents.1771887891.DESKTOP-3GJ1NHV.20664.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/events.out.tfevents.1771887891.DESKTOP-3GJ1NHV.20664.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/events.out.tfevents.1771933158.DESKTOP-3GJ1NHV.33576.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/events.out.tfevents.1771933158.DESKTOP-3GJ1NHV.33576.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/events.out.tfevents.1771964342.DESKTOP-3GJ1NHV.22352.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/events.out.tfevents.1771964342.DESKTOP-3GJ1NHV.22352.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/events.out.tfevents.1771968719.DESKTOP-3GJ1NHV.36992.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/events.out.tfevents.1771968719.DESKTOP-3GJ1NHV.36992.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/events.out.tfevents.1772274001.DESKTOP-3GJ1NHV.21456.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/events.out.tfevents.1772274001.DESKTOP-3GJ1NHV.21456.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/events.out.tfevents.1772319346.DESKTOP-3GJ1NHV.23628.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/events.out.tfevents.1772319346.DESKTOP-3GJ1NHV.23628.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/events.out.tfevents.1772375348.DESKTOP-3GJ1NHV.37424.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/events.out.tfevents.1772375348.DESKTOP-3GJ1NHV.37424.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/output/log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/output/log.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/pipeline.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/pipeline.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/rf-detr-nano.pth" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/rf-detr-nano.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/clothing_detection_segmintation/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/clothing_detection_rf_detr/train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/best_model.pt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/best_model.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_1.pt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_1.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_2.pt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_2.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_3.pt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_3.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_4.pt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_4.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_5.pt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_5.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_6.pt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_6.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_7.pt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_7.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_8.pt" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/epoch_8.pt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/history.json" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/1b/history.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/tensorboard/events.out.tfevents.1772495503.DESKTOP-3GJ1NHV.44804.0" beforeDir="false" afterPath="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/runs/tensorboard/events.out.tfevents.1772495503.DESKTOP-3GJ1NHV.44804.0" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recomendation_engine/build_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/recomendation_engine/build_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/recomendation_engine/recomendation_engine/.idea/recomendation_engine.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recomendation_engine/processed_pool.pt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rf-detr-nano.pth" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+      <option value="repository" />
+    </option>
+  </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="9243" />
+    <option name="cachedIndexableFilesCount" value="9290" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="FileTemplateManagerImpl">
@@ -111,6 +72,9 @@
     <commands />
     <urls />
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="AISelfReview" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 1
@@ -123,32 +87,42 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.demo_engine.executor&quot;: &quot;Run&quot;,
     &quot;Python.download_model.executor&quot;: &quot;Run&quot;,
     &quot;Python.fix_notebooks.executor&quot;: &quot;Run&quot;,
+    &quot;Python.inference (1).executor&quot;: &quot;Run&quot;,
     &quot;Python.inference.executor&quot;: &quot;Run&quot;,
+    &quot;Python.init_qdrant.executor&quot;: &quot;Run&quot;,
     &quot;Python.model.executor&quot;: &quot;Run&quot;,
+    &quot;Python.seed_qdrant.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/ridamansour/DataspellProjects/WardrobeGenie/perception_layer/multi_attribute_classifire&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+    &quot;last_opened_file_path&quot;: &quot;/Users/ridamansour/DataspellProjects/WardrobeGenie/models/attribute_predictor/tensorboard&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.json.schema&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/perception_layer/multi_attribute_classifire" />
-      <recent name="$PROJECT_DIR$/UML" />
-      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/models/attribute_predictor/tensorboard" />
+      <recent name="$PROJECT_DIR$/models/attribute_predictor/1b" />
+      <recent name="$PROJECT_DIR$/model" />
+      <recent name="$PROJECT_DIR$/examples" />
       <recent name="$PROJECT_DIR$/recomendation_engine" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/UML" />
+      <recent name="$PROJECT_DIR$/models" />
+      <recent name="$PROJECT_DIR$/model/nlp_query" />
+      <recent name="$PROJECT_DIR$/model/visual_embedder" />
+      <recent name="$PROJECT_DIR$/model/stylist_brain" />
+      <recent name="$PROJECT_DIR$/model" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.inference">
-    <configuration name="download_model" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.seed_qdrant">
+    <configuration name="demo_engine" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="WardrobeGenie" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -157,12 +131,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/perception_layer/clothing_detection_yolo_backup" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/recomendation_engine" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/perception_layer/clothing_detection_yolo_backup/download_model.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/recomendation_engine/demo_engine.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -171,7 +145,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="fix_notebooks" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="inference (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="WardrobeGenie" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -180,12 +154,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/perception_layer/multi_attribute_classifire" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fix_notebooks.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/perception_layer/multi_attribute_classifire/inference.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -217,7 +191,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="model" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="init_qdrant" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="WardrobeGenie" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -226,12 +200,35 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/perception_layer/clothing_detection_yolo_backup" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/perception_layer/clothing_detection_yolo_backup/model.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/init_qdrant.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="seed_qdrant" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="WardrobeGenie" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/seed_qdrant.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -242,10 +239,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.seed_qdrant" />
+        <item itemvalue="Python.init_qdrant" />
+        <item itemvalue="Python.inference (1)" />
         <item itemvalue="Python.inference" />
-        <item itemvalue="Python.model" />
-        <item itemvalue="Python.download_model" />
-        <item itemvalue="Python.fix_notebooks" />
+        <item itemvalue="Python.demo_engine" />
       </list>
     </recent_temporary>
   </component>
@@ -267,9 +265,19 @@
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="d3b4c89b-0693-439c-9b2d-c4c40b3b889a" value="TOOL_WINDOW" />
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+        <entry key="d3b4c89b-0693-439c-9b2d-c4c40b3b889a">
           <value>
             <State />
           </value>
@@ -283,6 +291,11 @@
     <MESSAGE value="Fixed dataset generation script" />
     <MESSAGE value="Fixed color_utils.py bug for images containing less than 3 dominant colors" />
     <MESSAGE value="trained the stylist model" />
-    <option name="LAST_COMMIT_MESSAGE" value="trained the stylist model" />
+    <MESSAGE value="Switch the detection model from RF-DETR to the backup yolo model, created plant UML files on the project pipeline, updated the main pipeline to work with the yolo model" />
+    <MESSAGE value="Included .safetensors in lfs filter" />
+    <MESSAGE value="Created a new CI pipeline" />
+    <MESSAGE value="Updated paths accordingly for the `models` directory structure." />
+    <MESSAGE value="Reorganized models placements to one unified /models directory" />
+    <option name="LAST_COMMIT_MESSAGE" value="Reorganized models placements to one unified /models directory" />
   </component>
 </project>
