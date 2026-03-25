@@ -13,7 +13,7 @@ WardrobeGenie is a context-aware, machine learning-powered digital stylist. It t
 
 From a consumer standpoint, the WardrobeGenie API drives a three-step loop:
 
-1. **The Digital Closet (Ingestion):** Users upload photos of their clothes. The API automatically detects the garment, removes the background, and assigns semantic attributes (formality, weather-warmth, color harmony).
+1. **The Digital Closet (Ingestion):** Users upload photos of their clothes. The API automatically detects the garments in the image, and assigns semantic attributes (formality, weather-warmth, color harmony) to each garment.
 2. **The Stylist (Recommendation):** Users send natural language queries (e.g., *"Business casual for a rainy day"*). The API translates this text into mathematical vectors, filters the wardrobe using Qdrant, and generates a mathematically optimized combinatorial outfit (Top + Bottom + Shoes).
 3. **The Vote (Personalization):** Users vote on the recommended outfits (Like, Dislike, or Skip). This feedback triggers a Reinforcement Learning loop, shifting the user's "style centroid" in the vector space so future recommendations adapt to their exact taste.
 
@@ -56,19 +56,25 @@ The true engine behind WardrobeGenie is its automated MLOps lifecycle, orchestra
 
 ## The Machine Learning Pipeline
 
+WardrobeGenie operates on a four-tier architecture, transforming raw user uploads and text queries into dynamic, personalized outfit recommendations through a continuous feedback loop.
+
 ### 1. Perception Layer (Image Processing)
-* **Detection & Segmentation:** Isolates garments from user uploads. 
-  * *Note: The primary **RF-DETR Nano** model is currently underfitted. The live API temporarily falls back to a robust **YOLO-based** detector while RF-DETR continues training in the Airflow pipeline.*
-* **Multi-Attribute Classifier:** An EfficientNet-B0 multi-head model predicts fit, style, weather warmth, and formality in a single forward pass.
-* **Color Quantizer:** K-Means clustering extracts dominant HEX codes for color harmony scoring.
+* **Detection & Segmentation:** Isolates individual garments from raw user uploads. 
+  * *Note: The primary **RF-DETR Nano** model is currently fine-tuning in the Airflow pipeline. The live API temporarily utilizes a robust **YOLO-based** detector as a fallback during this training phase.*
+* **Multi-Attribute Classifier:** An EfficientNet-B0 multi-head model predicts fit, style, weather appropriateness (warmth), and formality in a single forward pass.
+* **Color Quantizer:** K-Means clustering extracts dominant HEX codes from segmented items to compute downstream color harmony scores.
 
 ### 2. Semantic & Representation Layers
-* **Query Vectorization:** A Distilled BERT / MobileCLIP text branch encodes user queries into 512-dim vectors.
-* **Visual Embeddings:** A MobileNetV3 student model (distilled from a CLIP ViT teacher) converts cropped images into normalized 512-dim "vibe" embeddings.
+* **Query Vectorization:** A Distilled BERT / MobileCLIP text branch encodes natural language user queries (e.g., "casual dinner in autumn") into dense 512-dimensional vectors.
+* **Visual Embeddings:** A MobileNetV3 student model (distilled from a CLIP ViT teacher) converts cropped garment images into normalized 512-dimensional "vibe" embeddings for rapid similarity search.
 
-### 3. The "Brain" Layer (Recommendation)
-* **Gatekeeper:** A hybrid filter combining semantic similarity (cosine) with boolean context constraints (e.g., `formality_score >= 0.60`).
-* **Set-Transformer (Stylist):** An attention-based model that evaluates a candidate set (Top, Bottom, Shoes) and outputs a unified aesthetic compatibility score.
+### 3. The "Brain" Layer (Recommendation Engine)
+* **Hybrid Gatekeeper:** A first-pass filter that combines semantic similarity (cosine distance between text and image embeddings) with hard boolean context constraints (e.g., `formality_score >= 0.60` and `weather == cold`).
+* **Set-Transformer (The Stylist):** An attention-based neural network that evaluates a candidate set of items (e.g., Top, Bottom, Shoes) simultaneously, outputting a unified aesthetic compatibility score for the entire outfit.
+
+### 4. The Adaptive Layer (Online Preference Learning)
+* **Dynamic Taste Tracking:** Users are represented by a 128-dim "taste centroid." Positive feedback (saves/likes) uses an Exponential Moving Average (EMA) to pull this centroid toward the outfit's embedding, while skips push it away.
+* **Adaptive Weighting:** The final recommendation balances Aesthetic Style (α) and Query Relevance (β). These weights shift in real-time based on instantaneous user feedback, automatically prioritizing whichever metric the user actively engages with most.
 
 ---
 
