@@ -5,7 +5,7 @@ from tqdm import tqdm
 from datasets import load_dataset
 
 
-def prepare_fashionpedia_complete(output_dir):
+def prepare_fashionpedia_complete(output_dir="../../data/fashionpedia_coco"):
     # 1. Load Dataset
     print("Loading Fashionpedia from Hugging Face...")
     full_ds = load_dataset("detection-datasets/fashionpedia", split="train")
@@ -121,12 +121,12 @@ def prepare_fashionpedia_complete(output_dir):
 
 # Execute
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Download the Fashionpedia dataset in COCO format")
-    parser.add_argument(
-        "--output_dir",
-        default="../../data/fashionpedia_coco",
-        help="Folder containing split images"
-    )
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(description="Download the Fashionpedia dataset in COCO format")
+    # parser.add_argument(
+    #     "--output_dir",
+    #     default="../../data/fashionpedia_coco",
+    #     help="Folder containing split images"
+    # )
+    # args = parser.parse_args()
 
-    # prepare_fashionpedia_complete()
+    prepare_fashionpedia_complete()

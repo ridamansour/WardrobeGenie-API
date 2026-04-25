@@ -8,7 +8,7 @@ This module is part of the perception layer:
 - Detect garments
 - Provide bbox, mask, category, confidence
 """
-
+import os
 from pathlib import Path
 import torch
 from rfdetr import RFDETRNano
@@ -17,8 +17,15 @@ from rfdetr import RFDETRNano
 # Configuration
 # --------------------------------------------------
 
-NUM_CLASSES = 46
-CLASS_NAMES = [f"class_{i}" for i in range(NUM_CLASSES)]
+CLASS_NAMES = [
+    'shirt, blouse', 'top, t-shirt, sweatshirt', 'sweater', 'cardigan', 'jacket', 'vest',
+    'pants', 'shorts', 'skirt', 'coat', 'dress', 'jumpsuit', 'cape', 'glasses', 'hat',
+    'headband, head covering, hair accessory', 'tie', 'glove', 'watch', 'belt', 'leg warmer',
+    'tights, stockings', 'sock', 'shoe', 'bag, wallet', 'scarf', 'umbrella', 'hood', 'collar',
+    'lapel', 'epaulette', 'sleeve', 'pocket', 'neckline', 'buckle', 'zipper', 'applique',
+    'bead', 'bow', 'flower', 'fringe', 'ribbon', 'rivet', 'ruffle', 'sequin', 'tassel'
+]
+NUM_CLASSES = len(CLASS_NAMES)
 
 DATASET_DIR = Path("../../data/fashionpedia_coco")
 OUTPUT_DIR = Path("../../models")
@@ -29,7 +36,7 @@ TRAIN_CONFIG = {
     "batch_size": 4,
     "grad_accum_steps": 4,
     "num_workers": 2,
-    "epochs": 100,
+    "epochs": 300,
     "lr": 5e-5,
     "weight_decay": 1e-4,
     "use_ema": True,
@@ -47,11 +54,10 @@ TRAIN_CONFIG = {
 
 def create_model(device: str = DEVICE, checkpoint_path: str = None) -> RFDETRNano:
     """
-    Create RF-DETR Nano model.
+    Create RF-DETR Nano model, optionally loading from a checkpoint.
     """
     if checkpoint_path:
-        # FIX: Use 'pretrain_weights' instead of 'checkpoint'
-        # rfdetr automatically handles loading the file and extracting EMA weights!
+        print(f"Loading weights from: {checkpoint_path}")
         return RFDETRNano(
             num_classes=NUM_CLASSES,
             device=device,
@@ -67,13 +73,22 @@ def train_model(
     dataset_dir: Path = DATASET_DIR,
     output_dir: Path = OUTPUT_DIR,
     device: str = DEVICE,
-):
+    resume_checkpoint: str = None):
     """
-    Train RF-DETR Nano on Fashionpedia dataset.
+    Execute the distributed training loop.
     """
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
 
-    model = create_model(device)
+    # Initialize model (from scratch or resuming)
+    model = create_model(device, checkpoint_path=resume_checkpoint)
 
+    print(f"Starting training on {device}...")
+    print(f"Dataset: {dataset_dir}")
+    print(f"Output:  {output_dir}")
+
+    # The rfdetr .train() method will handle DDP internally
+    # when launched via torchrun.
     model.train(
         dataset_dir=str(dataset_dir),
         output_dir=str(output_dir),
@@ -92,8 +107,6 @@ def load_model(checkpoint_path: str, device: str = DEVICE) -> RFDETRNano:
     """
     Load a trained checkpoint for inference.
     """
-    # Simply initialize using the factory.
-    # Delete the manual torch.load() and load_state_dict() code!
     model = create_model(device, checkpoint_path)
 
     return model

@@ -5,7 +5,7 @@ from tqdm import tqdm
 from datasets import load_dataset
 
 
-def prepare_fashionpedia_complete(output_dir):
+def prepare_fashionpedia_complete(output_dir="../../data/fashionpedia_coco"):
     # 1. Load Dataset
     print("Loading Fashionpedia from Hugging Face...")
     full_ds = load_dataset("detection-datasets/fashionpedia", split="train")
@@ -26,16 +26,36 @@ def prepare_fashionpedia_complete(output_dir):
         "test": test_ds
     }
 
-    # 3. Pre-calculate global categories to ensure consistency across all JSONs
-    print("Extracting global categories...")
+    # 3. Pre-calculate global categories using provided names
+    print("Extracting global categories with human-readable names...")
+
+    # Define your class names list here
+    CLASS_NAMES = [
+        'shirt, blouse', 'top, t-shirt, sweatshirt', 'sweater', 'cardigan', 'jacket', 'vest',
+        'pants', 'shorts', 'skirt', 'coat', 'dress', 'jumpsuit', 'cape', 'glasses', 'hat',
+        'headband, head covering, hair accessory', 'tie', 'glove', 'watch', 'belt', 'leg warmer',
+        'tights, stockings', 'sock', 'shoe', 'bag, wallet', 'scarf', 'umbrella', 'hood', 'collar',
+        'lapel', 'epaulette', 'sleeve', 'pocket', 'neckline', 'buckle', 'zipper', 'applique',
+        'bead', 'bow', 'flower', 'fringe', 'ribbon', 'rivet', 'ruffle', 'sequin', 'tassel'
+    ]
+
     unique_cats = set()
     for sample in full_ds:
         unique_cats.update(sample['objects']['category'])
 
-    global_categories = [
-        {"id": int(cat_id), "name": f"class_{cat_id}", "supercategory": "fashion"}
-        for cat_id in sorted(list(unique_cats))
-    ]
+    global_categories = []
+    for cat_id in sorted(list(unique_cats)):
+        # Ensure the ID is within the range of our CLASS_NAMES list
+        if cat_id < len(CLASS_NAMES):
+            name = CLASS_NAMES[cat_id]
+        else:
+            name = f"unknown_class_{cat_id}"
+
+        global_categories.append({
+            "id": int(cat_id),
+            "name": name,
+            "supercategory": "fashion"
+        })
 
     # 4. Process each split
     for split, ds in dataset_splits.items():
@@ -101,12 +121,12 @@ def prepare_fashionpedia_complete(output_dir):
 
 # Execute
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Download the Fashionpedia dataset in COCO format")
-    parser.add_argument(
-        "--output_dir",
-        default="../../data/fashionpedia_coco",
-        help="Folder containing split images"
-    )
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(description="Download the Fashionpedia dataset in COCO format")
+    # parser.add_argument(
+    #     "--output_dir",
+    #     default="../../data/fashionpedia_coco",
+    #     help="Folder containing split images"
+    # )
+    # args = parser.parse_args()
 
-    prepare_fashionpedia_complete(output_dir=args.output_dir)
+    prepare_fashionpedia_complete()
