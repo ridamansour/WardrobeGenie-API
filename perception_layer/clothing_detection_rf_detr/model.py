@@ -17,18 +17,25 @@ from rfdetr import RFDETRNano
 # Configuration
 # --------------------------------------------------
 
+# CLASS_NAMES = [
+#     'shirt, blouse', 'top, t-shirt, sweatshirt', 'sweater', 'cardigan', 'jacket', 'vest',
+#     'pants', 'shorts', 'skirt', 'coat', 'dress', 'jumpsuit', 'cape', 'glasses', 'hat',
+#     'headband, head covering, hair accessory', 'tie', 'glove', 'watch', 'belt', 'leg warmer',
+#     'tights, stockings', 'sock', 'shoe', 'bag, wallet', 'scarf', 'umbrella', 'hood', 'collar',
+#     'lapel', 'epaulette', 'sleeve', 'pocket', 'neckline', 'buckle', 'zipper', 'applique',
+#     'bead', 'bow', 'flower', 'fringe', 'ribbon', 'rivet', 'ruffle', 'sequin', 'tassel'
+# ]
+
 CLASS_NAMES = [
     'shirt, blouse', 'top, t-shirt, sweatshirt', 'sweater', 'cardigan', 'jacket', 'vest',
     'pants', 'shorts', 'skirt', 'coat', 'dress', 'jumpsuit', 'cape', 'glasses', 'hat',
     'headband, head covering, hair accessory', 'tie', 'glove', 'watch', 'belt', 'leg warmer',
-    'tights, stockings', 'sock', 'shoe', 'bag, wallet', 'scarf', 'umbrella', 'hood', 'collar',
-    'lapel', 'epaulette', 'sleeve', 'pocket', 'neckline', 'buckle', 'zipper', 'applique',
-    'bead', 'bow', 'flower', 'fringe', 'ribbon', 'rivet', 'ruffle', 'sequin', 'tassel'
+    'tights, stockings', 'sock', 'shoe', 'bag, wallet', 'scarf', 'umbrella'
 ]
 NUM_CLASSES = len(CLASS_NAMES)
 
 DATASET_DIR = Path("../../data/fashionpedia_coco")
-OUTPUT_DIR = Path("../../models")
+OUTPUT_DIR = Path("../../models/rf_detr_fasionopedia_300epochs")
 
 DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
