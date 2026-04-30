@@ -1,14 +1,18 @@
 import torch
 from PIL import Image
 import torchvision.transforms as T
-from representation_layer.visual_embeddings.model import StudentEncoder
+from model import StudentEncoder  # Standardized import path
 
 
 class GarmentEmbedder:
     def __init__(self, model_path, device="cpu"):
         self.device = device
         self.model = StudentEncoder(embed_dim=512)
-        self.model.load_state_dict(torch.load(model_path, map_location=device))
+
+        # weights_only=True for safe deserialization
+        state_dict = torch.load(model_path, map_location=device, weights_only=True)
+        self.model.load_state_dict(state_dict)
+
         self.model.eval().to(device)
 
         self.transform = T.Compose([
@@ -31,4 +35,4 @@ class GarmentEmbedder:
         tensor = self.transform(crop_image).unsqueeze(0).to(self.device)
         with torch.no_grad():
             vector = self.model(tensor)
-        return vector  # (1, 512)
+        return vector  # Shape: (1, 512)

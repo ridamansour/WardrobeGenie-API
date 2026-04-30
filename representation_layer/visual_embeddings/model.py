@@ -4,7 +4,6 @@ import torch.nn.functional as F
 import torchvision.models as models
 from transformers import CLIPVisionModelWithProjection
 
-
 class StudentEncoder(nn.Module):
     """MobileNetV3-Small: High speed, low memory for on-device embedding."""
 
@@ -13,7 +12,6 @@ class StudentEncoder(nn.Module):
         self.backbone = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT)
 
         # Update the classifier head
-        # MobileNetV3-Small features output 576 channels before the final pooling
         in_features = self.backbone.classifier[0].in_features
         self.backbone.classifier = nn.Sequential(
             nn.Linear(in_features, 1024),

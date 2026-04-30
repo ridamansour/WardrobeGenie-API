@@ -3,8 +3,15 @@ import json
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
+from torch.utils.data.dataloader import default_collate
 import torchvision.transforms as T
 
+def collate_fn(batch):
+    """Filters out None values to prevent DataLoader crashes on missing/corrupt data."""
+    batch = [b for b in batch if b is not None]
+    if len(batch) == 0:
+        return None
+    return default_collate(batch)
 
 class FashionpediaCropDataset(Dataset):
     def __init__(self, split_root):
@@ -54,8 +61,8 @@ class FashionpediaCropDataset(Dataset):
             cropped_img = full_img.crop((x, y, x + w, y + h))
             student_tensor = self.student_transform(cropped_img)
 
-            # Load Pre-computed Teacher Embedding
-            teacher_tensor = torch.load(emb_path)
+            # Load Pre-computed Teacher Embedding (Safe Load)
+            teacher_tensor = torch.load(emb_path, weights_only=True)
 
             return student_tensor, teacher_tensor
         except Exception:
