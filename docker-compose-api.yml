@@ -18,7 +18,7 @@ services:
       - qdrant
     restart: unless-stopped
 
-  # 2. Vector Database for blazing fast semantic search
+  # 2. Vector Database for fast semantic search
   qdrant:
     image: qdrant/qdrant:latest
     container_name: wg_vector_db
