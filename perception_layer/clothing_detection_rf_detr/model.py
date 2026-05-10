@@ -35,7 +35,7 @@ CLASS_NAMES = [
 NUM_CLASSES = len(CLASS_NAMES)
 
 DATASET_DIR = Path("../../data/fashionpedia_coco")
-OUTPUT_DIR = Path("../../models/rf_detr_fasionopedia_300epochs")
+OUTPUT_DIR = Path("../../models/rf_detr_fashionopedia")
 
 DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
@@ -43,7 +43,7 @@ TRAIN_CONFIG = {
     "batch_size": 4,
     "grad_accum_steps": 4,
     "num_workers": 2,
-    "epochs": 300,
+    "epochs": 100,
     "lr": 5e-5,
     "weight_decay": 1e-4,
     "use_ema": True,
