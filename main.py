@@ -24,7 +24,7 @@ from qdrant_client import QdrantClient
 
 # --- Local Module Imports ---
 from perception_layer.clothing_detection_yolo_backup.inference import GarmentDetector
-from perception_layer.multi_attribute_classifire.inference import AttributePredictor
+from perception_layer.multi_attribute_classifier.inference import AttributePredictor
 from representation_layer.visual_embeddings.inference import GarmentEmbedder
 from recomendation_engine.brain_engine import FashionBrain
 from perception_layer.color_utils import quantize_colors, harmony_score_from_images

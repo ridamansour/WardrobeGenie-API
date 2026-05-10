@@ -3,9 +3,9 @@
 ## 1. Perception Layer (Image Processing)
 
 ### A. Clothing Detection & Segmentation (RF-DETR Segmentation Nano)
-**Data source:** Fasionopedia Dataset
+**Data source:** Fashionopedia Dataset
 
-**Fasionopedia Dataset Example**:
+**Fashionopedia Dataset Example**:
 ```
 Labels:
     PIL.Image()  # e.g. (1920x1080)
@@ -29,7 +29,7 @@ Target:
 
 ### B. Multi-Attribute Classifier (EfficientNet-B0, Multi-Head)
 
-**Attributes source (image from Fasionopedia Dataset passed through model A1 (RF-DETR Segmentation Nano):**
+**Attributes source (image from Fashionopedia Dataset passed through model A1 (RF-DETR Segmentation Nano):**
 ```python
 import torch
 from PIL import Image

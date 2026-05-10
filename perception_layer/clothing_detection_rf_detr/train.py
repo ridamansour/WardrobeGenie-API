@@ -15,7 +15,7 @@ import argparse
 from pathlib import Path
 import torch
 
-from perception_layer.clothing_detection_segmintation.model import create_model, TRAIN_CONFIG, DEVICE
+from perception_layer.clothing_detection_rf_detr.model import create_model, TRAIN_CONFIG, DEVICE
 
 
 # --------------------------------------------------

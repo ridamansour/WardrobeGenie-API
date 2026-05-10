@@ -94,7 +94,7 @@ class GarmentDetector:
 # --------------------------------------------------
 
 if __name__ == "__main__":
-    detector = GarmentDetector("../../models/rf_detr_fasionopedia/checkpoint_best_regular.pth")
+    detector = GarmentDetector("../../models/rf_detr_fashionopedia/checkpoint_best_ema.pth")
 
     # image = load_image("../../examples/ex2.jpeg")
     for img_path in Path("../../examples").glob("*.jpeg"):
