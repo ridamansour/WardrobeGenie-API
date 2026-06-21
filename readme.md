@@ -60,7 +60,6 @@ WardrobeGenie operates on a four-tier architecture, transforming raw user upload
 
 ### 1. Perception Layer (Image Processing)
 * **Detection & Segmentation:** Isolates individual garments from raw user uploads. 
-  * *Note: The primary **RF-DETR Nano** model is currently fine-tuning in the Airflow pipeline. The live API temporarily utilizes a robust **YOLO-based** detector as a fallback during this training phase.*
 * **Multi-Attribute Classifier:** An EfficientNet-B0 multi-head model predicts fit, style, weather appropriateness (warmth), and formality in a single forward pass.
 * **Color Quantizer:** K-Means clustering extracts dominant HEX codes from segmented items to compute downstream color harmony scores.
 
