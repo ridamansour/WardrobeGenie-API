@@ -64,8 +64,8 @@ WardrobeGenie operates on a four-tier architecture, transforming raw user upload
 * **Color Quantizer:** K-Means clustering extracts dominant HEX codes from segmented items to compute downstream color harmony scores.
 
 ### 2. Semantic & Representation Layers
-* **Query Vectorization:** A Distilled BERT / MobileCLIP text branch encodes natural language user queries (e.g., "casual dinner in autumn") into dense 512-dimensional vectors.
-* **Visual Embeddings:** A MobileNetV3 student model (distilled from a CLIP ViT teacher) converts cropped garment images into normalized 512-dimensional "vibe" embeddings for rapid similarity search.
+* **Query Vectorization:** A Distilled BERT / FashionCLIP text branch encodes natural language user queries (e.g., "casual dinner in autumn") into dense 512-dimensional vectors.
+* **Visual Embeddings:** A MobileNetV3 student model (distilled from a FashionCLIP teacher) converts cropped garment images into normalized 512-dimensional "vibe" embeddings for rapid similarity search.
 
 ### 3. The "Brain" Layer (Recommendation Engine)
 * **Hybrid Gatekeeper:** A first-pass filter that combines semantic similarity (cosine distance between text and image embeddings) with hard boolean context constraints (e.g., `formality_score >= 0.60` and `weather == cold`).
