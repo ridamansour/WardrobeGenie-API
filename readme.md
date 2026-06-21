@@ -42,7 +42,7 @@ The true engine behind WardrobeGenie is its automated MLOps lifecycle, orchestra
 
 1. **`wardrobegenie_batch_ingestion`**
    * Periodically fetches bulk user uploads from cloud storage (e.g., AWS S3).
-   * Validates data idempotency and routes images through the offline Perception Layer (YOLOS cropping and Attribute Extraction).
+   * Validates data idempotency and routes images through the offline Perception Layer (RF-DETRS cropping and Attribute Extraction).
    * Generates 512-dim visual embeddings and pushes them directly into the Qdrant database.
 2. **`wardrobegenie_data_synthesis`**
    * Automates the formatting of COCO datasets for vision tasks.
