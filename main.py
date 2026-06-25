@@ -23,8 +23,8 @@ from PIL import Image
 from qdrant_client import QdrantClient
 
 # --- Local Module Imports ---
-from perception_layer.clothing_detection_yolo_backup.inference import GarmentDetector
-from perception_layer.multi_attribute_classifier.inference import AttributePredictor
+from perception_layer.clothing_detection_rf_detr.inference import GarmentDetector
+from perception_layer.multi_attribute_classifier.old_model.inference import AttributePredictor
 from representation_layer.visual_embeddings.inference import GarmentEmbedder
 from recomendation_engine.brain_engine import FashionBrain
 from perception_layer.color_utils import quantize_colors, harmony_score_from_images
@@ -57,9 +57,9 @@ async def lifespan(app: FastAPI):
         raise FileNotFoundError(f"Model directory not found: {MODELS_DIR}")
 
     # 1. Perception
-    print("Loading YOLOS Detector...")
-    YOLO_MODEL_PATH = MODELS_DIR / "yolos-fashionpedia/"
-    ml_models['detector'] = GarmentDetector(str(YOLO_MODEL_PATH))
+    print("Loading RF-DETR Detector...")
+    RF_DETR_MODEL_PATH = MODELS_DIR / "rf-detr_detection" / "checkpoint_best_ema.pth"
+    ml_models['detector'] = GarmentDetector(str(RF_DETR_MODEL_PATH))
 
 
     ATTR_MODEL_PATH = MODELS_DIR / "attribute_predictor" / "1b" / "best_model.pt"

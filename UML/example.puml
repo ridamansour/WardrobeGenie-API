@@ -23,16 +23,16 @@ skinparam database {
 rectangle "User Inputs\n\n- Clothing Image\n- Text Query\n- Occasion / Weather / Mood" as UI #F5F5F5
 
 package "1. Perception Layer\n(Image Processing)" #D9ECFF {
-  rectangle "Clothing Detection & Segmentation\nRF-DETR Segmentation Nano\n\nDetect garments + bbox + mask + crop" as P1 #EAF4FF
+  rectangle "Clothing Detection \nRF-DETR Segmentation Nano\n\nDetect garments + bbox + mask + crop" as P1 #EAF4FF
   rectangle "Multi-Attribute Classifier\nEfficientNet-B0 Multi-Head\n\nfit, style, weather_warmth,\nformality_score" as P2 #EAF4FF
   rectangle "Color Quantizer\nK-Means Clustering\n\nDominant colors + percentages" as P3 #EAF4FF
   rectangle "Dominant Color Selector\nFunction / Thresholding\n\nCompact color list for scoring" as P4 #EAF4FF
-  rectangle "Visual Embeddings\nStudent CLIP / MobileNetV3\n\n512-dim normalized image vector" as P5 #EAF4FF
+  rectangle "Visual Embeddings\nStudent FashionCLIP / MobileNetV3\n\n512-dim normalized image vector" as P5 #EAF4FF
   rectangle "On-Device Deployment\nTFLite / CoreML + Quantization" as P6 #EAF4FF
 }
 
 package "2. Textual Query Understanding\n(Semantic Processing)" #FFF1B8 {
-  rectangle "Query Vectorization\nDistilled BERT / MobileCLIP\n\n512-dim query embedding" as T1 #FFF8D6
+  rectangle "Query Vectorization\nDistilled BERT / FashionCLIP\n\n512-dim query embedding" as T1 #FFF8D6
   rectangle "Intent & Filter Extraction\nZero-Shot Text Classification\n\nformal / casual / office /\nrainy / warm / sporty" as T2 #FFF8D6
   rectangle "Hybrid Filtering Signals\n\nsemantic similarity +\nboolean/context rules" as T3 #FFF8D6
 }

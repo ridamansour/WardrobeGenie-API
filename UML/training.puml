@@ -63,7 +63,7 @@ package "2. Attribute Pseudo-Labeling" #E6E6FA {
 ' --- 3. Knowledge Distillation Prep ---
 package "3. Teacher Embedding Generation" #FFE4E1 {
   rectangle "Garment Cropper" as Crop2 #FFF0F5
-  rectangle "TeacherEncoder Inference\n(Heavy CLIP ViT)" as Script3 #FFF0F5
+  rectangle "TeacherEncoder Inference\n(FashionCLIP)" as Script3 #FFF0F5
   database "Teacher Embeddings\n(.pt per garment)" as TeachDB #FFF0F5
 
   note bottom of TeachDB
