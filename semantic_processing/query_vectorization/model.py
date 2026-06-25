@@ -1,22 +1,26 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
-from transformers import CLIPTextModel, CLIPTokenizer, DistilBertModel, DistilBertTokenizer
+# CHANGED: Using CLIPTextModelWithProjection to get the correctly projected fashion text embeddings
+from transformers import CLIPTokenizer, CLIPTextModelWithProjection, DistilBertModel, DistilBertTokenizer
 import torch.nn.functional as F
 from tqdm import tqdm
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 
 # ---------------------------------------------------------
 # 1. Define the Student Model (Distilled BERT -> 512 dim)
 # ---------------------------------------------------------
 class DistilledQueryEncoder(nn.Module):
+    """MobileNetV3-style sister text network using DistilBERT."""
+
     def __init__(self, base_model="distilbert-base-uncased", out_dim=512):
         super().__init__()
         self.bert = DistilBertModel.from_pretrained(base_model)
-        # Projection head to map BERT's 768-dim output to CLIP's 512-dim space
+        # Projection head to map BERT's 768-dim output to FashionCLIP's 512-dim space
         self.projection = nn.Linear(self.bert.config.hidden_size, out_dim)
 
     def forward(self, input_ids, attention_mask):
@@ -46,11 +50,16 @@ class QueryDataset(Dataset):
 # 3. Distillation Loop
 # ---------------------------------------------------------
 def train_distillation(queries, epochs=5, batch_size=32, lr=2e-5):
-    # Initialize Teacher (Standard CLIP)
-    teacher_name = "openai/clip-vit-base-patch32"
+    # CHANGED: Initialize Teacher with FashionCLIP instead of OpenAI CLIP
+    teacher_name = "patrickjohncyh/fashion-clip"
+    print(f"Loading FashionCLIP Teacher text components from {teacher_name}...")
     teacher_tokenizer = CLIPTokenizer.from_pretrained(teacher_name)
-    teacher_model = CLIPTextModel.from_pretrained(teacher_name).to(device)
+    teacher_model = CLIPTextModelWithProjection.from_pretrained(teacher_name).to(device)
     teacher_model.eval()
+
+    # Freeze teacher parameters
+    for param in teacher_model.parameters():
+        param.requires_grad = False
 
     # Initialize Student
     student_tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
@@ -69,15 +78,15 @@ def train_distillation(queries, epochs=5, batch_size=32, lr=2e-5):
             with torch.no_grad():
                 t_tokens = teacher_tokenizer(batch_queries, padding=True, truncation=True, return_tensors="pt").to(
                     device)
-                t_features = teacher_model(**t_tokens).pooler_output
+                # CHANGED: extract 'text_embeds' which includes the 512-dim fashion projection
+                t_features = teacher_model(**t_tokens).text_embeds
                 t_features = F.normalize(t_features, dim=-1)
 
             # 2. Get Student Embeddings
             s_tokens = student_tokenizer(batch_queries, padding=True, truncation=True, return_tensors="pt").to(device)
             s_features = student_model(s_tokens['input_ids'], s_tokens['attention_mask'])
 
-            # 3. Calculate Loss (Cosine Embedding Loss is excellent for vector alignment)
-            # Target is 1 because we want the vectors to be as similar as possible
+            # 3. Calculate Loss (Cosine Embedding Loss)
             target = torch.ones(s_features.size(0)).to(device)
             loss = F.cosine_embedding_loss(s_features, t_features, target)
 
@@ -90,19 +99,21 @@ def train_distillation(queries, epochs=5, batch_size=32, lr=2e-5):
 
         print(f"Epoch {epoch + 1} | Average Loss: {total_loss / len(dataloader):.4f}")
 
-    # Save the distilled student model
-    torch.save(student_model.state_dict(), "../../models/nlp_query/distilled_query_encoder.pth")
-    print("Saved distilled model to distilled_query_encoder.pth")
+    # Ensure output directory exists before saving
+    output_path = "../../models/nlp_query/distilled_query_encoder.pth"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    torch.save(student_model.state_dict(), output_path)
+    print(f"Saved distilled model to {output_path}")
 
     return student_model, student_tokenizer
 
 
 if __name__ == "__main__":
-    # Load the massive synthetic dataset we just generated
+    # Load the massive synthetic dataset
     print("Loading synthetic queries...")
     with open("../../data/fashion_queries_realworld.txt", "r") as f:
         synthetic_queries = [line.strip() for line in f.readlines()]
 
     # Train the student model
-    # A batch size of 64 or 128 is recommended if your GPU/MPS can handle it
     train_distillation(synthetic_queries, epochs=5, batch_size=64, lr=2e-5)

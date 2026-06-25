@@ -109,7 +109,7 @@ def inject_typos(query, probability=0.25):
 # QUERY GENERATOR
 # =========================================================
 
-def generate_queries(num_samples=50000, output_file="fashion_queries_realworld.txt"):
+def generate_queries(num_samples=50000, output_file="../../data/fashion_queries_realworld.txt"):
 
     garments = [
         "jacket", "coat", "dress", "jeans", "hoodie",
