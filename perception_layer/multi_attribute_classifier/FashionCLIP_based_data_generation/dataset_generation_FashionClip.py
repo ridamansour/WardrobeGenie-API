@@ -50,7 +50,7 @@ from torchvision import transforms
 FASHIONCLIP_MODEL = "patrickjohncyh/fashion-clip"
 
 # Lower = sharper probabilities.
-TAU = 0.05
+TAU = 0.01
 
 # Fashionpedia filtered classes, remapped by your COCO generator to 0..26.
 CATEGORY_ID_TO_NAME = {
@@ -218,18 +218,15 @@ class CLIPPseudoLabeler:
 
     @staticmethod
     def _weighted_scalar(
-        probs: torch.Tensor,
-        weights: torch.Tensor,
+            probs: torch.Tensor,
+            weights: torch.Tensor,
     ) -> torch.Tensor:
+        """
+        Computes a pure continuous expected value. Completely removes the
+        hard threshold gate to allow smooth, organic distributions.
+        """
         weights = weights.to(probs.device)
-
-        max_prob, idx = probs.max(dim=-1)
-
-        expected = (probs * weights).sum(dim=-1)
-        hard = weights[idx]
-
-        # If confident, use hard value. Otherwise, preserve uncertainty.
-        return torch.where(max_prob > 0.6, hard, expected)
+        return (probs * weights).sum(dim=-1)
 
     @torch.no_grad()
     def label_batch(self, pil_images: list[Image.Image]) -> dict[str, torch.Tensor]:
