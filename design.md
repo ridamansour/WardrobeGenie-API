@@ -4,9 +4,9 @@
 
 These components process raw user photos to detect clothing items and extract attributes. Where supported by the platform, models can run in parallel using threads.
 
-### A. Clothing Detection & Segmentation (RF-DETR Segmentation Nano)
+### A. Clothing Detection (RF-DETR Detection Nano)
 
-**Model:** RF-DETR Segmentation Nano (Instance Segmentation), trained on Fashionpedia (≈50K images with masks).
+**Model:** RF-DETR Nano (Instance Segmentation), trained on Fashionpedia (K images with masks).
 **Purpose:** Detect garments (top/bottom/shoes), crop them, and provide category + confidence.
 
 #### Input:
@@ -29,14 +29,12 @@ Output:
             "category_id": 1,         # "Top"
             "confidence": 0.98,
             "bbox": [100, 50, 400, 500],
-            "mask": np.ndarray(...),  # optional binary mask
             "image": PIL.Image()      # Cropped Top
         },
         {
             "category_id": 2,         # "Bottom"
             "confidence": 0.94,
             "bbox": [120, 420, 420, 980],
-            "mask": np.ndarray(...),
             "image": PIL.Image()
         }
     ]
@@ -46,7 +44,7 @@ Output:
 - [x] Modeled
 - [x] Tested
 - [x] Trained
-- [ ] Tested
+- [x] Tested
 
 ---
 
@@ -87,14 +85,13 @@ Output:
 
 **Labeling strategy:**
 
-* Cloud training can use **pseudo-labeling** via a vision-language model (CLIP-style) + a small manually verified set.
+* Cloud training can use **pseudo-labeling** via a vision-language model (FashionCLIP-style) + a small manually verified set.
 
 #### Status:
 - [x] Modeled
-- [x] Tested
-- [x] Trained
-- [x] Tested
-- [ ] Converted to TFLite
+- [ ] Tested
+- [ ] Trained
+- [ ] Tested
 
 ---
 
@@ -241,9 +238,7 @@ Output:
 - [x] Tested
 - [x] Trained
 - [x] Tested
-
-[//]: # (- [ ] Converted to TFLite)
-
+- 
 ---
 
 ### B. Intent & Filter Extraction (Zero-Shot Text Classification)
@@ -298,7 +293,7 @@ This layer produces vectors for fast similarity search and outfit relevance.
 
 ### A. Visual Embeddings (Student CLIP)
 
-**Model:** MobileNetV3 image encoder distilled from CLIP (ViT teacher).
+**Model:** MobileNetV3 image encoder distilled from FashionCLIP (ViT teacher).
 **Purpose:** Convert each item image into a normalized 512-dim “vibe” embedding.
 
 #### Input:
@@ -324,7 +319,6 @@ Output:
 - [x] Tested
 - [x] Trained
 - [ ] Tested
-- [ ] Converted to TFLite
 
 ---
 
@@ -489,7 +483,7 @@ All heavy training is done on device (GPU):
 
 * RF-DETR segmentation (Fashionpedia)
 * EfficientNet multi-head attribute classifier (pseudo-labeling + small manual set)
-* Student CLIP distillation (teacher CLIP → student MobileNet)
+* Student FashionCLIP distillation (teacher FashionCLIP → student MobileNet)
 * Outfit transformer (outfit compatibility ranking)
 
 ### B. On-Device Deployment
