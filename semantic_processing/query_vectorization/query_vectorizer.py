@@ -5,7 +5,7 @@ from semantic_processing.query_vectorization.model import DistilledQueryEncoder
 
 # Assuming DistilledQueryEncoder is imported from the training script
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu"
 
 
 class QueryVectorizer:
@@ -14,7 +14,7 @@ class QueryVectorizer:
     using a custom distilled lightweight model.
     """
 
-    def __init__(self, model_path="distilled_query_encoder.pth"):
+    def __init__(self, model_path="../../models/nlp_query/distilled_query_encoder.pth"):
         # Load the student tokenizer
         self.tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
 
