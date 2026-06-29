@@ -2,7 +2,7 @@
 airflow.cfg
 airflow.db
 unittests.cfg
-webserver_config.py
+src/main/webserver_config.py
 *.pid
 logs/
 data/
