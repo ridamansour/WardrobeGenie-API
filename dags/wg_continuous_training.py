@@ -42,7 +42,7 @@ with DAG(
 
     extract_feedback = BashOperator(
         task_id='extract_feedback',
-        bash_command=f"python {PROJECT_ROOT_STR}/scripts/pull_db_logs.py"
+        bash_command=f"python {PROJECT_ROOT_STR}/src/airflow/scripts/pull_db_logs.py"
     )
 
     retrain_model = BashOperator(
@@ -53,7 +53,7 @@ with DAG(
 
     evaluate_model = BashOperator(
         task_id='evaluate_metrics',
-        bash_command=f"python {PROJECT_ROOT_STR}/recomendation_engine/evaluate.py"
+        bash_command=f"python {PROJECT_ROOT_STR}/src/main/recomendation_engine/evaluate.py"
     )
 
     check_improvement = BranchPythonOperator(

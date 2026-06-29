@@ -75,13 +75,13 @@ WardrobeGenie operates on a four-tier architecture, transforming raw user upload
 * **Dynamic Taste Tracking:** Users are represented by a 128-dim "taste centroid." Positive feedback (saves/likes) uses an Exponential Moving Average (EMA) to pull this centroid toward the outfit's embedding, while skips push it away.
 * **Adaptive Weighting:** The final recommendation balances Aesthetic Style (α) and Query Relevance (β). These weights shift in real-time based on instantaneous user feedback, automatically prioritizing whichever metric the user actively engages with most.
 
-![Recommendation Pipeline](UML/Main%20Pipeline.png)
+![Recommendation Pipeline](docs/UML/images/Main%20Pipeline.png)
 
 ---
 
 ## Data Lineage 
 
-![Recommendation Pipeline](UML/training-Dataset_Generation.png)
+![Recommendation Pipeline](docs/UML/images/training-Dataset_Generation.png)
 
 ---
 
