@@ -615,6 +615,10 @@ Copyright (c) 2026 Rida Mansour
 
 ## Acknowledgements
 
+Special thanks to [Alejandro Alberto Carrasco Ruiz](https://github.com/QuantumDevGlitcher) for generously providing computational resources that made training and experimentation for this project possible.
+
+This project also builds upon the excellent work of the following open-source projects and datasets:
+
 * Fashionpedia
 * Hugging Face
 * FastAPI
