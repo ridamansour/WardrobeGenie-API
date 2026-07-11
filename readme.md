@@ -20,9 +20,6 @@ The system combines:
 * **online preference adaptation** for personalization over time
 * **Airflow-based MLOps** for batch ingestion, synthetic data generation, and scheduled retraining
 
-> [!NOTE]
-> **Project History:** This repository continues the development of WardrobeGenie. For the earlier Git history and foundational development, refer to the original repository: [Original Repository](https://github.com/QuantumDevGlitcher/WardrobeGenie).
-
 ---
 
 ## TL;DR
