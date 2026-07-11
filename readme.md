@@ -503,7 +503,9 @@ Examples include:
 
 ## License
 
-This project is licensed under the terms described in `LICENSE.md`.
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+
+Copyright (c) 2026 Rida Mansour
 
 ---
 
