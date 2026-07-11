@@ -1,126 +1,517 @@
-# WardrobeGenie: Intelligent Fashion Recommendation Engine
+# WardrobeGenie
 
-![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.103.1-009688.svg?logo=fastapi)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg?logo=pytorch)
-![Qdrant](https://img.shields.io/badge/Qdrant-Vector_DB-FF5252.svg)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg?logo=docker)
-![Apache Airflow](https://img.shields.io/badge/Apache_Airflow-2.8+-017CEE.svg?logo=apache-airflow)
+> **A context-aware fashion recommendation engine powered by computer vision, semantic vector search, and neural outfit ranking.**
 
-WardrobeGenie is a context-aware, machine learning-powered digital stylist. It transcends standard static rule-based engines by utilizing a **Retrieval-Augmented Generation (RAG)** architecture for computer vision, continuously learning from user feedback to map an individual's unique aesthetic.
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
+![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-red)
+![Qdrant](https://img.shields.io/badge/Qdrant-Vector%20Database-orange)
+![Docker](https://img.shields.io/badge/Docker-Containers-blue)
+![Airflow](https://img.shields.io/badge/Apache%20Airflow-MLOps-darkred)
 
-## The Product: What the API Does
+WardrobeGenie is an end-to-end machine learning system that transforms a user's wardrobe into a searchable semantic database and generates personalized outfit recommendations from natural language requests.
 
-From a consumer standpoint, the WardrobeGenie API drives a three-step loop:
+The system combines:
 
-1. **The Digital Closet (Ingestion):** Users upload photos of their clothes. The API automatically detects the garments in the image, and assigns semantic attributes (formality, weather-warmth, color harmony) to each garment.
-2. **The Stylist (Recommendation):** Users send natural language queries (e.g., *"Business casual for a rainy day"*). The API translates this text into mathematical vectors, filters the wardrobe using Qdrant, and generates a mathematically optimized combinatorial outfit (Top + Bottom + Shoes).
-3. **The Vote (Personalization):** Users vote on the recommended outfits (Like, Dislike, or Skip). This feedback triggers a Reinforcement Learning loop, shifting the user's "style centroid" in the vector space so future recommendations adapt to their exact taste.
-
----
-
-## Enterprise Architecture & Separation of Concerns
-
-To ensure production-grade reliability, the infrastructure is strictly decoupled into two isolated Dockerized stacks:
-
-### 1. Online Serving Stack (Low Latency API)
-Managed via `docker-compose.yml`, this stack handles real-time mobile app requests.
-* **FastAPI:** Asynchronous API gateway.
-* **Qdrant Vector Engine:** Hardware-accelerated Approximate Nearest Neighbor (ANN) search over 512-dimensional garment embeddings.
-* **The "Brain" (Set-Transformer):** Dynamically scores combinatorial outfits based on context.
-
-### 2. Offline Orchestration Stack (High Throughput ETL)
-Managed via `docker-compose-airflow.yml`, this stack safely processes heavy data without bottlenecking the live API.
-* **Apache Airflow:** Orchestrates DAGs for batch image ingestion, feature extraction, and continuous model training.
-* **CI/CD Pipeline:** GitHub Actions automatically tests API routing and logic via mocked PyTorch models on every push to `main`.
+* **computer vision** for garment detection and attribute extraction
+* **vector embeddings** for semantic retrieval
+* **neural ranking** for outfit compatibility scoring
+* **online preference adaptation** for personalization over time
+* **Airflow-based MLOps** for batch ingestion, synthetic data generation, and scheduled retraining
 
 ---
 
-## MLOps & Airflow Pipelines
+## TL;DR
 
-The true engine behind WardrobeGenie is its automated MLOps lifecycle, orchestrated entirely by **Apache Airflow**. The system utilizes three primary Directed Acyclic Graphs (DAGs) to maintain the ML models:
-
-1. **`wardrobegenie_batch_ingestion`**
-   * Periodically fetches bulk user uploads from cloud storage (e.g., AWS S3).
-   * Validates data idempotency and routes images through the offline Perception Layer (RF-DETRS cropping and Attribute Extraction).
-   * Generates 512-dim visual embeddings and pushes them directly into the Qdrant database.
-2. **`wardrobegenie_data_synthesis`**
-   * Automates the formatting of COCO datasets for vision tasks.
-   * Programmatically synthesizes massive datasets of realistic NLP queries—utilizing combinatorial templates, simulated mobile "fat-finger" typos, and regional spelling variants—to train and robustly refine the semantic intent models used by the Gatekeeper.
-3. **`wardrobegenie_continuous_training`**
-   * The reinforcement loop. Aggregates the "Vote" feedback from users.
-   * Retrains the Triplet Set-Transformer in the background on a scheduled interval.
-   * Validates model accuracy metrics and seamlessly updates the `/models` directory without API downtime.
+WardrobeGenie lets users upload clothing photos, extracts garments and their attributes, stores visual embeddings in Qdrant, retrieves relevant items from natural language queries, ranks complete outfits, and adapts recommendations based on user feedback.
 
 ---
 
-## The Machine Learning Pipeline
+## Features
 
-WardrobeGenie operates on a four-tier architecture, transforming raw user uploads and text queries into dynamic, personalized outfit recommendations through a continuous feedback loop.
+### Digital Wardrobe
 
-### 1. Perception Layer (Image Processing)
-* **Detection & Segmentation:** Isolates individual garments from raw user uploads. 
-* **Multi-Attribute Classifier:** An EfficientNet-B0 multi-head model predicts fit, style, weather appropriateness (warmth), and formality in a single forward pass.
-* **Color Quantizer:** K-Means clustering extracts dominant HEX codes from segmented items to compute downstream color harmony scores.
+* Automatic garment detection
+* Clothing cropping and segmentation
+* Multi-attribute prediction
+* Dominant color extraction
 
-### 2. Semantic & Representation Layers
-* **Query Vectorization:** A Distilled BERT / FashionCLIP text branch encodes natural language user queries (e.g., "casual dinner in autumn") into dense 512-dimensional vectors.
-* **Visual Embeddings:** A MobileNetV3 student model (distilled from a FashionCLIP teacher) converts cropped garment images into normalized 512-dimensional "vibe" embeddings for rapid similarity search.
+### Semantic Search
 
-### 3. The "Brain" Layer (Recommendation Engine)
-* **Hybrid Gatekeeper:** A first-pass filter that combines semantic similarity (cosine distance between text and image embeddings) with hard boolean context constraints (e.g., `formality_score >= 0.60` and `weather == cold`).
-* **Set-Transformer (The Stylist):** An attention-based neural network that evaluates a candidate set of items (e.g., Top, Bottom, Shoes) simultaneously, outputting a unified aesthetic compatibility score for the entire outfit.
+* Natural language outfit queries
+* Dense vector embeddings for text and image alignment
+* Approximate nearest-neighbor retrieval with Qdrant
 
-### 4. The Adaptive Layer (Online Preference Learning)
-* **Dynamic Taste Tracking:** Users are represented by a 128-dim "taste centroid." Positive feedback (saves/likes) uses an Exponential Moving Average (EMA) to pull this centroid toward the outfit's embedding, while skips push it away.
-* **Adaptive Weighting:** The final recommendation balances Aesthetic Style (α) and Query Relevance (β). These weights shift in real-time based on instantaneous user feedback, automatically prioritizing whichever metric the user actively engages with most.
+### Context-Aware Recommendation
 
-![Recommendation Pipeline](docs/UML/images/Main%20Pipeline.png)
+* Weather filtering
+* Formality constraints
+* Garment-category constraints
+* Outfit ranking with a neural model
+
+### Personalization
+
+* Like / Dislike / Skip feedback
+* Online preference adaptation
+* Dynamic user style representation
+
+### Production Infrastructure
+
+* FastAPI REST API
+* Dockerized deployment
+* Apache Airflow orchestration
+* CI with GitHub Actions
 
 ---
 
-## Data Lineage 
+## System Architecture
 
-![Recommendation Pipeline](docs/UML/images/training-Dataset_Generation.png)
+WardrobeGenie separates real-time inference from offline training and data generation.
+
+![System Architecture](docs/UML/images/Main%20Pipeline.png)
+
+### Online Serving Stack
+
+The online stack handles low-latency API requests:
+
+* **FastAPI** for request handling and validation
+* **Qdrant** for semantic retrieval over garment embeddings
+* **Recommendation engine** for candidate filtering and outfit ranking
+
+### Offline Orchestration Stack
+
+The offline stack handles heavier workloads:
+
+* **Apache Airflow** for scheduled batch ingestion
+* **Synthetic dataset generation** for training robustness
+* **Continuous model training** for periodic updates
+* **Model validation and checkpoint management**
+
+---
+
+## Repository Structure
+
+```text
+WardrobeGenie-API/
+├── .github/
+│   └── workflows/
+├── dags/
+├── data/
+│   ├── examples/
+│   ├── user_uploads/
+│   └── fashion_queries_realworld.txt
+├── docs/
+│   ├── UML/
+│   ├── db_schema.json
+│   ├── design.md
+│   └── models_training_strategy.md
+├── logs/
+├── models/
+│   ├── attribute_predictor/
+│   ├── nlp_query/
+│   ├── rf-detr_detection/
+│   ├── rf_detr_fashionopedia/
+│   ├── stylist_brain/
+│   ├── visual_embedder/
+│   └── yolos-fashionpedia/
+├── public/
+│   └── uploads/
+├── src/
+│   ├── airflow/
+│   ├── main/
+│   │   ├── perception_layer/
+│   │   ├── representation_layer/
+│   │   ├── semantic_processing/
+│   │   ├── recomendation_engine/
+│   │   ├── main.py
+│   │   ├── seed_qdrant.py
+│   │   └── webserver_config.py
+│   └── tests/
+├── Dockerfile
+├── docker-compose-api.yml
+├── docker-compose-airflow.yml
+├── requirements.txt
+├── LICENSE.md
+└── README.md
+```
+
+---
+
+## Machine Learning Architecture
+
+WardrobeGenie is organized into five major layers.
+
+### 1. Perception Layer
+
+This layer transforms raw wardrobe photos into structured garment data.
+
+Components include:
+
+* RF-DETR garment detection
+* Garment cropping
+* Multi-head attribute classification
+* Color quantization
+
+Each detected garment can be assigned metadata such as:
+
+* category
+* style
+* formality
+* weather suitability
+* dominant colors
+
+### 2. Representation Layer
+
+Each garment is embedded into a dense semantic vector space.
+
+The repository includes:
+
+* visual embedding generation
+* student–teacher distillation for lightweight inference
+* embedding inference pipelines
+
+### 3. Semantic Processing
+
+Natural language outfit requests are interpreted before retrieval.
+
+Example:
+
+> "Business casual outfit for rainy weather"
+
+The query is converted into:
+
+* a semantic embedding
+* intent signals
+* contextual filters
+
+### 4. Recommendation Engine
+
+Recommendation happens in three stages:
+
+#### Candidate Retrieval
+
+Qdrant retrieves semantically similar garments using approximate nearest-neighbor search.
+
+#### Context Filtering
+
+Items incompatible with the request are filtered using hard constraints such as:
+
+* weather
+* formality
+* garment category
+
+#### Neural Outfit Ranking
+
+Remaining garments are assembled into outfit candidates and evaluated jointly using an attention-based ranking model.
+
+### 5. Preference Adaptation
+
+WardrobeGenie adapts to user feedback over time.
+
+Supported feedback:
+
+* 👍 Like
+* 👎 Dislike
+* ⏭ Skip
+
+User preferences are represented as a continuously updated embedding that shifts toward preferred recommendations and away from disliked ones.
+
+---
+
+## Data Synthesis & Dataset Generation
+
+WardrobeGenie does not rely on a single dataset. Instead, it converts public fashion data into several task-specific datasets for detection, attributes, retrieval, recommendation, and query understanding.
+
+The full workflow is documented in `docs/UML/training.puml` and reflected in the offline preprocessing pipelines.
+
+![Dataset Generation](docs/UML/images/training-Dataset_Generation.png)
+
+### Source Dataset
+
+The primary source of visual data is **Fashionpedia**, downloaded from Hugging Face.
+
+Fashionpedia provides:
+
+* high-resolution fashion images
+* bounding box annotations
+* garment categories
+* segmentation annotations
+
+These annotations become the base for all downstream datasets.
+
+### 1. Detection Dataset
+
+The original Fashionpedia annotations are converted into a COCO-style detection dataset for RF-DETR training.
+
+During preprocessing, the pipeline:
+
+* converts bounding boxes into COCO format
+* remaps category IDs
+* validates annotations
+* creates train / validation / test splits
+
+This dataset is used for garment detection.
+
+### 2. Attribute Dataset
+
+Detected garments are cropped into individual images.
+
+Very small crops are discarded to reduce noise.
+
+Each crop is then passed through a CLIP-based pseudo-labeling pipeline that generates probabilistic targets for:
+
+* garment fit
+* style
+* weather warmth
+* formality
+
+These soft labels are stored as PyTorch tensors and used to train the multi-head attribute classifier.
+
+### 3. Embedding Distillation Dataset
+
+To train a lightweight visual encoder for production inference, FashionCLIP is used as a teacher model.
+
+Each garment crop is encoded into a 512-dimensional teacher embedding.
+
+These embeddings serve as supervision for the student encoder used in the production embedding pipeline.
+
+### 4. Recommendation Pool
+
+Each garment is processed into a richer record that includes:
+
+* semantic embedding
+* garment category
+* dominant colors from K-Means quantization
+* crop path
+
+Garments from the same source image are grouped into outfit pools to support candidate outfit generation.
+
+### 5. Synthetic NLP Query Dataset
+
+Natural language fashion queries are created procedurally using templates and vocabulary rules.
+
+The generator combines:
+
+* garment types
+* colors
+* weather
+* occasions
+* style descriptors
+* seasonal context
+
+It also injects realistic noise such as:
+
+* US / UK spelling variants
+* keyboard proximity typos
+* omitted characters
+* swapped letters
+* mobile typing mistakes
+
+Example outputs:
+
+* `smart casual blazer for date night`
+* `jakcet for winetr`
+
+These queries are used to train and evaluate the semantic query encoder.
+
+### Why Multiple Datasets?
+
+Each ML task has its own training objective, so WardrobeGenie generates specialized datasets instead of forcing one dataset to do everything.
+
+| Dataset                 | Purpose                                     |
+| ----------------------- | ------------------------------------------- |
+| COCO Detection          | Garment detection with RF-DETR              |
+| Attribute Dataset       | Multi-head garment attribute classification |
+| Teacher Embeddings      | Knowledge distillation for visual encoding  |
+| Recommendation Pool     | Outfit retrieval and ranking                |
+| Synthetic Query Dataset | Natural language query understanding        |
+
+---
+
+## Airflow Pipelines
+
+Apache Airflow orchestrates the offline ML workflows.
+
+### `wardrobegenie_batch_ingestion`
+
+Responsible for ingesting wardrobe uploads at scale.
+
+Typical steps:
+
+* fetch uploads from local storage or S3
+* validate idempotency
+* run detection and cropping
+* extract attributes and embeddings
+* insert processed garments into Qdrant
+
+### `wardrobegenie_data_synthesis`
+
+Generates and formats training data.
+
+Typical steps:
+
+* convert Fashionpedia to COCO
+* generate attribute pseudo-labels
+* create teacher embeddings
+* synthesize natural language queries
+* build recommendation pools
+
+### `wardrobegenie_continuous_training`
+
+Handles scheduled retraining and deployment.
+
+Typical steps:
+
+* aggregate feedback data
+* retrain the stylist model
+* validate performance
+* update model artifacts in `/models`
 
 ---
 
 ## Core API Endpoints
 
-* **`POST /analyze-outfit`**
-  * Accepts raw image uploads. Returns bounding boxes, quantized colors, and predicted attributes.
-* **`POST /recommend/search`**
-  * **The RAG Endpoint.** Accepts a text query and user context. Queries the Qdrant database for Top-K candidates, passes them through the Gatekeeper, and returns full outfits.
-* **`POST /feedback`**
-  * **The Vote.** Accepts boolean user feedback to dynamically update the $\alpha$ and $\beta$ scoring weights and adjust the user's stylistic centroid.
+### `POST /analyze-outfit`
+
+Accepts raw image uploads and returns:
+
+* bounding boxes
+* garment crops
+* dominant colors
+* predicted semantic attributes
+
+### `POST /recommend/search`
+
+Accepts a text query and user context.
+
+The endpoint:
+
+1. encodes the query into a vector
+2. retrieves candidate garments from Qdrant
+3. filters candidates using context rules
+4. ranks complete outfits
+5. returns the best outfit combination
+
+Example:
+
+```json
+{
+  "query": "Business casual for rainy weather",
+  "user_id": "42"
+}
+```
+
+### `POST /feedback`
+
+Accepts user feedback such as Like / Dislike / Skip and updates personalization state for future recommendations.
 
 ---
 
-## Local Deployment (Quickstart)
+## Local Development
 
-### 1. Boot the Serving Stack
-Boot the FastAPI backend and Qdrant Vector Database. 
+### 1. Start the API stack
+
 ```bash
 docker-compose -f docker-compose-api.yml up -d
 ```
 
-### 2. Seed the Vector Database
-Populate Qdrant with simulated 512-dim garment data to test the RAG pipeline.
+### 2. Seed Qdrant
+
 ```bash
 pip install -r requirements.txt
-python seed_qdrant.py
+python src/main/seed_qdrant.py
 ```
 
-### 3. Access the Interactive API
-Navigate to **`http://localhost:8000/docs`** to view the auto-generated Swagger UI and test live image uploads and vector search recommendations.
+### 3. Open the API docs
 
-### 4. Boot the MLOps Pipeline (Airflow)
-To view and trigger the offline data ingestion, feature extraction, and model training DAGs, initialize the Airflow stack. 
-*(Note: Set your local user ID first so Docker has the correct file permissions).*
+Visit:
+
+```text
+http://localhost:8000/docs
+```
+
+### 4. Start the Airflow stack
+
 ```bash
 echo -e "AIRFLOW_UID=$(id -u)" > .env
 docker-compose -f docker-compose-airflow.yml up -d
 ```
-Navigate to **`http://localhost:8080`** to access the Airflow UI. 
-* **Username:** `airflow`
-* **Password:** `airflow`
+
+### 5. Open the Airflow UI
+
+Visit:
+
+```text
+http://localhost:8080
+```
+
+Default credentials:
+
+* Username: `airflow`
+* Password: `airflow`
+
+---
+
+## Technology Stack
+
+| Layer                  | Technology                       |
+| ---------------------- | -------------------------------- |
+| API                    | FastAPI                          |
+| Deep Learning          | PyTorch                          |
+| Vector Database        | Qdrant                           |
+| Object Detection       | RF-DETR / YOLO-based experiments |
+| NLP                    | Distilled transformer models     |
+| Workflow Orchestration | Apache Airflow                   |
+| Containerization       | Docker                           |
+| CI/CD                  | GitHub Actions                   |
+
+---
+
+## Testing
+
+The repository includes API tests that mock ML components to validate request handling and endpoint behavior without requiring full model execution.
+
+Examples include:
+
+* health checks
+* request validation
+* recommendation endpoint schema tests
+
+---
+
+## Design Goals
+
+* Low-latency recommendation serving
+* Scalable vector retrieval
+* Modular ML pipeline design
+* Clear separation of online and offline workloads
+* Continuous personalization from feedback
+* Reproducible training and deployment workflows
+
+---
+
+## Future Work
+
+* Hybrid retrieval combining metadata and vector similarity
+* Incremental embedding updates
+* Collaborative preference modeling
+* Seasonal trend adaptation
+* Better outfit explanation generation
+* Recommendation caching for faster repeated queries
+
+---
+
+## License
+
+This project is licensed under the terms described in `LICENSE.md`.
+
+---
+
+## Acknowledgements
+
+* Fashionpedia
+* Hugging Face
+* FastAPI
+* PyTorch
+* Qdrant
+* Apache Airflow
