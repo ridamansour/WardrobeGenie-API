@@ -5,6 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
 ![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-red)
+![TensorBoard](https://img.shields.io/badge/Experiment%20Tracking-TensorBoard-orange)
 ![Qdrant](https://img.shields.io/badge/Qdrant-Vector%20Database-orange)
 ![Docker](https://img.shields.io/badge/Docker-Containers-blue)
 ![Airflow](https://img.shields.io/badge/Apache%20Airflow-MLOps-darkred)
@@ -215,6 +216,95 @@ Supported feedback:
 * ⏭ Skip
 
 User preferences are represented as a continuously updated embedding that shifts toward preferred recommendations and away from disliked ones.
+
+---
+
+## Training & Model Zoo
+
+WardrobeGenie consists of several independently trained models, each optimized for a specific stage of the recommendation pipeline. Every training pipeline follows a reproducible workflow with experiment tracking, model checkpointing, validation, and early stopping.
+
+Training metrics are logged with **TensorBoard**, enabling visualization of model convergence, validation performance, and learning dynamics throughout development.
+
+---
+
+### Model Zoo
+
+| Model                     | Purpose                      | Input                  | Output                                 |
+| ------------------------- | ---------------------------- | ---------------------- | -------------------------------------- |
+| **RF-DETR**               | Garment detection            | Fashion image          | Bounding boxes & garment classes       |
+| **EfficientNet-B0**       | Multi-attribute prediction   | Garment crop (224×224) | Fit, style, weather warmth & formality |
+| **MobileNetV3 (Student)** | Visual embedding generation  | Garment crop (224×224) | 512-dimensional embedding              |
+| **Distilled BERT**        | Semantic query encoding      | Natural language query | 512-dimensional embedding              |
+| **Set Transformer**       | Outfit compatibility ranking | Candidate outfit set   | Compatibility score                    |
+
+---
+
+### Training Workflow
+
+All models follow a common training pipeline:
+
+```text
+Dataset
+    │
+    ▼
+DataLoader
+    │
+    ▼
+Model Training
+    │
+    ▼
+Validation
+    │
+    ├──────────────► TensorBoard Logs
+    │
+    ├──────────────► Model Checkpoints
+    │
+    └──────────────► Early Stopping
+```
+
+Model checkpoints are stored under the `models/` directory, allowing experiments to be resumed, evaluated, and deployed independently.
+
+---
+
+### Experiment Tracking
+
+TensorBoard is used throughout development to monitor and compare training runs. Logged metrics vary by model but include:
+
+* Training and validation loss
+* Classification accuracy
+* Detection metrics (where applicable)
+* Learning rate schedules
+* Early stopping events
+* Checkpoint history
+
+Launch TensorBoard locally:
+
+```bash
+tensorboard --logdir=models/
+```
+
+Then open:
+
+```text
+http://localhost:6006
+```
+
+<p align="center">
+  <img src="docs/tensorboard-imgs/training-overview.png" width="900" alt="TensorBoard Training Dashboard">
+</p>
+
+---
+
+### Reproducibility
+
+The training pipeline is designed to support reproducible experimentation through:
+
+* Automated dataset generation and preprocessing
+* Versioned model checkpoints
+* TensorBoard experiment logging
+* Early stopping based on validation performance
+* Dockerized training environments
+* Apache Airflow orchestration for scheduled retraining
 
 ---
 
@@ -498,6 +588,20 @@ Examples include:
 * Seasonal trend adaptation
 * Better outfit explanation generation
 * Recommendation caching for faster repeated queries
+
+---
+
+## Project Statistics
+
+| Category | Count |
+|----------|------:|
+| Machine Learning Models | 5 |
+| Airflow DAGs | 3 |
+| REST API Endpoints | 3 |
+| Docker Compose Stacks | 2 |
+| Vector Database | 1 (Qdrant) |
+| CI Pipeline | GitHub Actions |
+| Experiment Tracking | TensorBoard |
 
 ---
 
