@@ -1,7 +1,5 @@
 # WardrobeGenie
 
-> **A context-aware fashion recommendation engine powered by computer vision, semantic vector search, and neural outfit ranking.**
-
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-API-green)
 ![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-red)
