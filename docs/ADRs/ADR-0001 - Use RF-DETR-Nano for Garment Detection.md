@@ -152,18 +152,4 @@ YOLO would likely be preferred for applications requiring continuous real-time d
 
 If future deployments require real-time mobile inference directly on user devices, lightweight YOLO variants may be evaluated as alternative perception backends. Because the detection stage is isolated from downstream recommendation components, the detector can be replaced without modifying the remainder of the pipeline.
 
----
 
-### One thing I'd add
-
-Since your project already has UML diagrams and documentation, include a short **Decision Summary** at the top of every ADR:
-
-| Item             | Decision                                                 |
-| ---------------- | -------------------------------------------------------- |
-| **Decision**     | Use RF-DETR-Nano for garment detection                   |
-| **Status**       | Accepted                                                 |
-| **Date**         | YYYY-MM-DD                                               |
-| **Impact**       | Perception Layer                                         |
-| **Related ADRs** | ADR-0002 (Visual Embeddings), ADR-0005 (Set Transformer) |
-
-It makes the ADRs much easier to scan and gives the documentation a polished, professional feel.
