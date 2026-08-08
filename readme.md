@@ -288,7 +288,9 @@ http://localhost:6006
 ```
 
 <p align="center">
-  <img src="docs/tensorboard-imgs/training-overview.png" width="900" alt="TensorBoard Training Dashboard">
+  <img src="docs/tensorboard-imgs/training-overview.png" width="900" alt="TensorBoard Training Dashboard 1">
+  <img src="docs/tensorboard-imgs/attribute-pred-train.png" width="900" alt="TensorBoard Training Dashboard 2">
+  <img src="docs/tensorboard-imgs/attribute-pred-valid.png" width="900" alt="TensorBoard Training Dashboard 3">  
 </p>
 
 ---
