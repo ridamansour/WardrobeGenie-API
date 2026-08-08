@@ -152,4 +152,4 @@ YOLO would likely be preferred for applications requiring continuous real-time d
 
 If future deployments require real-time mobile inference directly on user devices, lightweight YOLO variants may be evaluated as alternative perception backends. Because the detection stage is isolated from downstream recommendation components, the detector can be replaced without modifying the remainder of the pipeline.
 
-
+It makes the ADRs much easier to scan and gives the documentation a polished, professional feel.
